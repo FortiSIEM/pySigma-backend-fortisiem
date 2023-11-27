@@ -1,0 +1,50 @@
+- cd pySigma-backend-fortisiem/
+
+- ./tools/fortisiem_sigma_tool.py -o out/rule.xml -f YML_file_full_path
+   Generate rule.xml from YML_file_full_path
+
+- ./tools/fortisiem_sigma_tool.py -o out/rule.xml -i rules/linux
+  Generate rule.xml from yml files in rules/linux by FortisemBackend
+
+- ./tools/fortisiem_sigma_tool.py -t windows -c windows_sysmon -o out/rule.xml -i rules/windows
+- ./tools/fortisiem_sigma_tool.py -t windows -o out/rule.xml -i rules/windows
+  Generate rule.xml from yml files in rules/windows by WindowsBackend
+
+- ./tools/fortisiem_sigma_tool.py  -t windows -c windows_sysmon -o out/rule.xml -i list_YML_file_name.csv
+  Generate rule.xml from yml files listed in list_YML_file_name.csv
+
+- ./tools/fortisiem_sigma_tool.py -t windows -c windows_sysmon -o out/rule.xml -i rules/windows  --ruleFile ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
+  According to yml files in rules/windows to update ruleFile
+
+- ./tools/fortisiem_sigma_tool.py  -t windows -c windows_sysmon -o out/rule.xml -i list_YML_file_name.csv --ruleFile ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
+  According to yml files listed in list_YML_file_name.csv to update ruleFile 
+
+- ./tools/fortisiem_sigma_tool.py -t windows -c windows_sysmon -o out -i rules/windows --ruleFile ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
+     1. This command will compare THREAT_HUNTING_RULES_WIN_SIGMA_1.xml and rules generated from yml in rules/windows
+     2. It will generate four rule file:
+          out/SIGMA_no_change.xml
+          out/SIGMA_modified.xml
+          out/SIGMA_new.xml
+          out/SIGMA_deleted.xml
+          out/SIGMA_error.xml
+
+- ./tools/fortisiem_sigma_tool.py -t windows -c windows_sysmon -o out/SIGMA_rule.xml  -i rules/windows  --ruleFile ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
+     1. This command will compare THREAT_HUNTING_RULES_WIN_SIGMA_1.xml and rules generated from yml in rules/windows
+     2. It will generate a rule file:
+        out/SIGMA_rule.xml:  Output all rules expect the deleted rule. The rules are in order as it in THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
+        out/SIGMA_error.xml: Output all error rules
+
+- ./tools/fortisiem_sigma_tool.py  --ruleToCsv -o rules.csv --i  ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml 
+  Generate CSV file from a rule file
+
+- ./tools/fortisiem_sigma_tool.py  --ruleToCsv -o allRules.csv --i  ../../data-definition/rules/ 
+  Generate CSV file from  rule files
+
+-./tools/fortisiem_sigma_tool.py --reportToCsv -o reports.csv --i ../../data-definition/reports/WLAN_REPORTS.xml
+  Generate CSV file from a report files
+
+-./tools/fortisiem_sigma_tool.py --reportToCsv -o allReports.csv --i ../../data-definition/reports
+  Generate CSV file from report files
+
+./tools/fortisiem_sigma_tool.py --diff -o out/deletedFile.csv --ruleFile oldRuleFile.xml  -i newRuleFile.xml
+ Find the deleted rules in newRuleFile.xml from oldRuleFile.xml
