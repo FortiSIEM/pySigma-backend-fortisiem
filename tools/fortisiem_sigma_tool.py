@@ -14,6 +14,7 @@ from sigma.exceptions import SigmaError, SigmaValueError, SigmaConditionError
 sigma_path = os.getcwd()
 sys.path.insert(0, sigma_path)
 
+import os
 from sigma.pipelines.fortisiem.fortisiem import fortisiem_pipeline
 from sigma.pipelines.fortisiem.config import FortisiemConfig
 from sigma.backends.fortisiem.fortisiem import FortisemBackend 

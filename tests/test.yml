@@ -1,0 +1,38 @@
+title: Title name
+id: 9a4ff3b8-6187-4fd2-8e8b-e0eae1129495
+status: test
+description: Description 
+references:
+   - https://threathunterplaybook.com/hunts/windows/190625-RegKeyAccessSyskey/notebook.html
+author: test author
+date: 2019/08/12
+modified: 2021/11/27
+tags:
+    - attack.discovery
+    - attack.t1012
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID:
+            - 4656
+            - 4663
+        ObjectStar: 'Object*Star'
+        ObjectSkipStar: 'ObjectSkip\*Star'
+        ObjectEndWith|endswith:
+            - 'ObjectEndWithStr'
+            - 'ObjectEndWithStr\\*\*AA'
+        ObjectRe|re:
+            - '^Object*Re$'
+            - '^Object\\\*Re$'
+        ObjectStartwith|startswith:
+            - 'ObjectstartswithStr'
+            - 'Objectstartswith\\*\*Str'
+        ObjectContianAll|contains|all:
+            - '/owa/'
+            - '/powershell'
+    condition: selection
+falsepositives:
+    - Unknown
+level: high

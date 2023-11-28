@@ -210,7 +210,7 @@ class FortisemBackend(TextQueryBackend):
                 isContainWildcards, val = self.convert_str_val(arg.value, state)
                 value_str_list.append(val)
 
-                print("as_in_expression: %s: %s->%s" % (arg.field, arg.value, val))
+                #print("as_in_expression: %s: %s->%s" % (arg.field, arg.value, val))
 
         value_str_list = sorted(value_str_list)
         if isinstance(cond, ConditionOR):
@@ -259,7 +259,7 @@ class FortisemBackend(TextQueryBackend):
         field = self.escape_and_quote_field(cond.field)
         value = cond.value.regexp 
 
-        print("eq_val_re: %s: %s->%s" % (field, cond.value.regexp, value))
+        #print("eq_val_re: %s: %s->%s" % (field, cond.value.regexp, value))
         return self.re_expression.format(field = field, 
                              value = value)
 
@@ -306,7 +306,7 @@ class FortisemBackend(TextQueryBackend):
                 expr = self.eq_expression
 
             field=self.escape_and_quote_field(cond.field)
-            print("eq_val_str: %s: %s->%s" % (cond.field, cond.value, val))
+            #print("eq_val_str: %s: %s->%s" % (cond.field, cond.value, val))
             return expr.format(
                 field=field,
                 value= val,

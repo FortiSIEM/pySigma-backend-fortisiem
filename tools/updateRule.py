@@ -243,6 +243,6 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
             ruleIndex = ruleIndex + 1
             #print("New Rule %s" % filePath)
             addUpdatedStatus(newRule, RULE_STATUS.NEW)
-            rulesDicts["ruleName"][ruleName] = (None, RULE_STATUS.NEW, newRule)
+            rulesDicts["ruleName"][ruleName] = (newRule, RULE_STATUS.NEW)
 
         return ruleIndex

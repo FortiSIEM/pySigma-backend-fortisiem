@@ -10,7 +10,6 @@ def prettyXML(elem):
           return "<Rule/>"
      root = etree.XML(ET.tostring(elem))
      content = etree.tostring(root, pretty_print = True, encoding = str)
-     print(content)
      return content
 
 def outputStatuRules(rulesDicts, outFile, status):
@@ -28,7 +27,7 @@ def outputStatuRules(rulesDicts, outFile, status):
         if status is None:
            if item[1] != RULE_STATUS.DELETE:
               outputRule = item[0]
-              if item[1] in (RULE_STATUS.NEW, RULE_STATUS.MODIFIED):
+              if item[1] in (RULE_STATUS.MODIFIED):
                   if item[2].find("ErrMsg") is not None:
                      continue;
                   outputRule = item[2]
@@ -45,10 +44,10 @@ def outputStatuRules(rulesDicts, outFile, status):
                print(newRulexmlstr, file=out)
             elif item[1] == status:
                 outputRule = item[0]
-                if status == RULE_STATUS.NEW:
+                if status == RULE_STATUS.MODIFIED:
+                    outputRule = item[2]
                     if item[2].find("ErrMsg") is not None:
                        continue;
-                    outputRule = item[2]
                 xmlstr = prettyXML(outputRule)
                 count = count + 1
                 print(xmlstr, file=out)
