@@ -14,6 +14,9 @@ from sigma.pipelines.fortisiem.fortisiem import fortisiem_pipeline
 from sigma.pipelines.fortisiem.config import FortisiemConfig
 from sigma.backends.fortisiem.fortisiem import FortisemBackend 
 from sigma.backends.fortisiem.xmlRuleFormater import FortisiemXMLRuleFormater 
+sigma_path = os.getcwd()
+sys.path.insert(0, sigma_path)
+
 from tools.output import outputStatuRules,outputRules
 from tools.updateRule import addNewRule, loadRulesXML, RULE_STATUS
 import codecs
@@ -166,8 +169,8 @@ def main():
     
     config = FortisiemConfig(); 
     config.loadMitreAttackMatrixFile("tools/config/MITRE-Attack-matrix.csv");
-    config.loadFieldNameToFortiSIEMAttrNameMap("tools/fortisiem/config/winAttr2InternalAttr.csv");
-    config.loadFieldValToFortiSIEMFieldValMap("tools/fortisiem/config/WinCode2ET.csv")
+    config.loadFieldNameToFortiSIEMAttrNameMap("tools/config/winAttr2InternalAttr.csv");
+    config.loadFieldValToFortiSIEMFieldValMap("tools/config/WinCode2ET.csv")
     config.loadLogsourceUsedToSkipRuleMap("tools/config/SkipRuleByLogsource.csv")
 
     for sigmaFile in sigmaFileList:
