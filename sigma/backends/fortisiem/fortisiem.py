@@ -56,6 +56,10 @@ class FortisemBackend(TextQueryBackend):
     list_separator : ClassVar[str] = ", "
     reg_or_separator : ClassVar[str] = "|"
 
+    unbound_value_str_expression : ClassVar[str] = '{value}'
+    unbound_value_num_expression : ClassVar[str] = '{value}'
+    unbound_value_re_expression : ClassVar[str] = '{value}'
+
     formater = None
 
     def __init__(self, processing_pipeline: Optional["sigma.processing.pipeline.ProcessingPipeline"] = None, collect_errors: bool = False, min_time : str = "-30d", max_time : str = "now", query_settings : Callable[[SigmaRule], Dict[str, str]] = lambda x: {}, output_settings : Dict = {}, **kwargs):

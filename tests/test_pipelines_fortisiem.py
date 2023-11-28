@@ -6,10 +6,6 @@ import yaml
 import pathlib
 from sigma.collection import SigmaCollection
 from sigma.exceptions import SigmaError, SigmaValueError, SigmaConditionError
-
-sigma_path = os.getcwd()
-sys.path.insert(0, sigma_path)
-
 from sigma.pipelines.fortisiem.fortisiem import fortisiem_pipeline
 from sigma.pipelines.fortisiem.config import FortisiemConfig
 from sigma.backends.fortisiem.fortisiem import FortisemBackend
@@ -26,11 +22,11 @@ def test_fortisiem_pipeline():
     sigmaFile = "tests/test.yml"
     sigmaCollection = loadYml(sigmaFile)
     config = FortisiemConfig();
-    config.loadMitreAttackMatrixFile("sigma/pipelines/fortisiem/config/MITRE-Attack-matrix.csv");
+    config.loadMitreAttackMatrixFile("tools/config/MITRE-Attack-matrix.csv");
     config = FortisiemConfig();
-    config.loadMitreAttackMatrixFile("sigma/pipelines/fortisiem/config/MITRE-Attack-matrix.csv");
-    config.loadFieldNameToFortiSIEMAttrNameMap("sigma/pipelines/fortisiem/config/winAttr2InternalAttr.csv");
-    config.loadFieldValToFortiSIEMFieldValMap("sigma/pipelines/fortisiem/config/WinCode2ET.csv")
+    config.loadMitreAttackMatrixFile("tools/config/MITRE-Attack-matrix.csv");
+    config.loadFieldNameToFortiSIEMAttrNameMap("tools/config/winAttr2InternalAttr.csv");
+    config.loadFieldValToFortiSIEMFieldValMap("tools/config/WinCode2ET.csv")
     for rule in sigmaCollection.rules:
         processing_pipeline = fortisiem_pipeline(config, rule)
         backend = FortisemBackend(processing_pipeline=processing_pipeline)

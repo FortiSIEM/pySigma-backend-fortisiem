@@ -10,11 +10,6 @@ import itertools
 import logging
 from sigma.collection import SigmaCollection
 from sigma.exceptions import SigmaError, SigmaValueError, SigmaConditionError
-
-sigma_path = os.getcwd()
-sys.path.insert(0, sigma_path)
-
-import os
 from sigma.pipelines.fortisiem.fortisiem import fortisiem_pipeline
 from sigma.pipelines.fortisiem.config import FortisiemConfig
 from sigma.backends.fortisiem.fortisiem import FortisemBackend 
@@ -170,10 +165,10 @@ def main():
         ruleIndex = maxRuleIndex + 1
     
     config = FortisiemConfig(); 
-    config.loadMitreAttackMatrixFile("sigma/pipelines/fortisiem/config/MITRE-Attack-matrix.csv");
-    config.loadFieldNameToFortiSIEMAttrNameMap("sigma/pipelines/fortisiem/config/winAttr2InternalAttr.csv");
-    config.loadFieldValToFortiSIEMFieldValMap("sigma/pipelines/fortisiem/config/WinCode2ET.csv")
-    config.loadLogsourceUsedToSkipRuleMap("sigma/pipelines/fortisiem/config/SkipRuleByLogsource.csv")
+    config.loadMitreAttackMatrixFile("tools/config/MITRE-Attack-matrix.csv");
+    config.loadFieldNameToFortiSIEMAttrNameMap("tools/fortisiem/config/winAttr2InternalAttr.csv");
+    config.loadFieldValToFortiSIEMFieldValMap("tools/fortisiem/config/WinCode2ET.csv")
+    config.loadLogsourceUsedToSkipRuleMap("tools/config/SkipRuleByLogsource.csv")
 
     for sigmaFile in sigmaFileList:
         try:
