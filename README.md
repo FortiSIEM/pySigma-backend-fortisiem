@@ -1,5 +1,5 @@
-![Tests](https://github.com/meiliu@fortinet.com/pySigma-backend-fortisiem/actions/workflows/test.yml/badge.svg)
-![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/meiliu@fortinet.com/GitHub Gist identifier containing coverage badge JSON expected by shields.io./raw/meiliu@fortinet.com-pySigma-backend-fortisiem.json)
+![Tests](https://github.com/FortiSIEM/pySigma-backend-fortisiem/actions/workflows/test.yml/badge.svg)
+![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/meiliumeiliu/d37be47299d1095351b315bd0725f6ba/raw/03d9dbf574d335fcef1435ac507d0b91c30be0b9/FortiSIEM-pySigma-backend-fortisiem.json)
 ![Status](https://img.shields.io/badge/Status-pre--release-orange)
 
 # pySigma python Backend
