@@ -22,7 +22,6 @@ def loadYml(file_path):
         return ymlRule;
     return None
 
-@pytest.fixture
 def test_fortisiem_backend():
     sigmaFile = "tests/test.yml"
     sigmaCollection = loadYml(sigmaFile) 
@@ -30,16 +29,11 @@ def test_fortisiem_backend():
     config.loadMitreAttackMatrixFile("sigma/pipelines/fortisiem/config/MITRE-Attack-matrix.csv");
     for rule in sigmaCollection.rules:
         backend = FortisemBackend(processing_pipeline=None)
-
         ruleId = "PH_Rule_SIGMA_1" 
-        ruleType = "windows"
+        ruleType = ""
         formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId, ruleType)
         xmlRules = backend.convert(rule, formater)
-        print(xmlRules[0])
         file_content = None
         with open("tests/expectRule.xml", 'r') as file:
             file_content = file.read()
-            print(file_content)
-
         assert xmlRules[0].strip(" ") == file_content.strip(" ")
-

@@ -22,7 +22,6 @@ def loadYml(file_path):
         return ymlRule;
     return None
 
-@pytest.fixture
 def test_fortisiem_pipeline():
     sigmaFile = "tests/test.yml"
     sigmaCollection = loadYml(sigmaFile)
@@ -40,11 +39,9 @@ def test_fortisiem_pipeline():
         ruleType = ""
         formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId, ruleType)
         xmlRules = backend.convert(rule, formater)
-        print(xmlRules[0])
         file_content = None
         with open("tests/expectRuleFromPipelineTest.xml", 'r') as file:
             file_content = file.read()
-            print(file_content)
 
         assert xmlRules[0].strip(" ") == file_content.strip(" ")
 
