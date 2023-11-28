@@ -31,7 +31,7 @@ class FortisemBackend(TextQueryBackend):
     eq_token : ClassVar[str] = " = "
 
     field_quote: ClassVar[str] = '"'
-    field_quote_pattern: ClassVar[Pattern] = re.compile("^[\w.]+$")
+    field_quote_pattern: ClassVar[Pattern] = re.compile("^[\\w.]+$")
 
     str_quote : ClassVar[str] = '"'
     escape_char : ClassVar[str] = "\\"

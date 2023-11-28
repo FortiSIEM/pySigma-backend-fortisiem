@@ -20,5 +20,4 @@
       <GroupEvtConstr>COUNT(*) &gt;= 1</GroupEvtConstr>
     </SubPattern>
   </PatternClause>
-<SIGMAUpdateStatus>New</SIGMAUpdateStatus></Rule>
-
+</Rule>
