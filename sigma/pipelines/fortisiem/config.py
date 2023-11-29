@@ -55,10 +55,7 @@ class FortisiemConfig:
 
                 if len(row) > 1:
                      for t in typeET:
-                         if row[1].find(".*") == -1:
-                             self.event_id_2_event_type_dict[t][row[0]] = row[1]
-                         else:
-                             self.event_id_2_event_type_dict[t][row[0]] = "FSM_REG_WILDCARD" + row[1]
+                         self.event_id_2_event_type_dict[t][row[0]] = row[1]
 
     def loadLogsourceUsedToSkipRuleMap(self, csvFileName):
         with open(csvFileName, newline='') as csvfile:
@@ -140,8 +137,6 @@ class FortisiemConfig:
             if providerStr:
                 code = "%s-%s" % (provider, code)
                 code = re.sub(' ', '-', code)
-            else:
-                print("ERROR: Unsupport to get provider name from %s in convertEvtID2EvtType" %  str(provider))
 
             tmp, keyword = self.getEvtTypeByEvtID(service, code)
             val = "%s-%s" % (keyword, code)
@@ -154,12 +149,12 @@ class FortisiemConfig:
             return val
         elif keyword is not None:
             if "Win-Sysmon" == keyword:
-                val = "FSM_REG_WILDCARDWin-Sysmon-%s-.*" % code
+                val = "Win-Sysmon-%s-.*" % code
             else:
                 val = "%s-%s" % (keyword, code)
             return val
         else:
-            return "FSM_REG_WILDCARDWin-.*-%s[^\\d]*" % code
+            return "Win-.*-%s[^\\d]*" % code
 
     def formatEvtTypeVal(self, code: str, product, service, provider=None):
         if product != "windows":
@@ -176,7 +171,7 @@ class FortisiemConfig:
             vals = self.formatEvtTypeVal(str(value), product, service, provider);
             return vals
         else:
-            print("ERROR: Unsupport to convert value of %s" % fieldName)
+            print("WARNING: Unsupport to convert value of %s" % fieldName)
             return None
 
     def shouldAppendCondition(self, rule: SigmaRule):
@@ -197,7 +192,7 @@ class FortisiemConfig:
             if service in Windows_logsource_Condition_map:
                 return product, service, Windows_logsource_Condition_map[service]
         else:
-            print("ERROR: Unsupport to get condition for %s in getConditionByLogsource" % product )
+            print("WARNING: Unsupport to get condition for %s in getConditionByLogsource" % product )
         return product, service, None
 
     def getAllAttrName(self, rule: SigmaRule):

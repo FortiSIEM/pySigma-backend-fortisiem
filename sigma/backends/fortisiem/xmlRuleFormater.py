@@ -8,14 +8,12 @@ from sigma.pipelines.fortisiem.config import FortisiemConfig
 class FortisiemXMLRuleFormater:
     ruleRoot =None 
 
-    rule_type = None
-    rule_index = 1;
+    ruleId = None;
     yml_file_name = None
     config = None
 
-    def __init__(self, config: FortisiemConfig, file_name, rule_index, rule_type):
-        self.rule_index = rule_index;
-        self.rule_type = rule_type
+    def __init__(self, config: FortisiemConfig, file_name, ruleId):
+        self.ruleId = ruleId;
         self.yml_file_name = file_name
         self.config = config
 
@@ -66,10 +64,6 @@ class FortisiemXMLRuleFormater:
         ruleEvtType="PH_RULE_%s" % tmp
         return ruleEvtType
 
-    def setRuleId(self, ruleid, rule_type):
-       self.ruleId = ruleid
-       self.rule_type = rule_type
-
     def setymlfile(self, yml_file_name):
         self.yml_file_name = yml_file_name
 
@@ -100,7 +94,7 @@ class FortisiemXMLRuleFormater:
         return groupname
 
     def getRuleId(self):
-        return self.rule_index;
+        return self.ruleId;
 
     def formatSubFunctionAndTechniqueId(self, techniqueIds):
         sub_function_str = "Persistence";

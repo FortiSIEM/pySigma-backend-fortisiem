@@ -61,9 +61,8 @@ class FortisiemReplaceDetectionItemTransformation(DetectionItemTransformation):
 
             detection_item = d.field
             if type(detection_item.value) is not list:
-                print("FortisiemReplaceDetectionItemTransformation: Unsupport this type %s" % type(detection_item.value))
-
-                exit(-1)
+                error = "Unsupport this type %s to FortisiemReplaceDetectionItemTransformation." % type(detection_item.value)
+                raise NotImplementedError(error)
 
             values = []
             for val in detection_item.value:
@@ -85,7 +84,6 @@ class FortisiemReplaceDetectionItemTransformation(DetectionItemTransformation):
                               values.append(SigmaString(newVal))
 
             detection_item.value = values;
-            #print("FortisiemReplaceDetectionItemTransformation:")
             newItems.append(detection_item)
 
         detection.detection_items = newItems 

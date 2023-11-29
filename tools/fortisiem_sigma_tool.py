@@ -9,7 +9,7 @@ import pathlib
 import itertools
 import logging
 from sigma.collection import SigmaCollection
-from sigma.exceptions import SigmaError, SigmaValueError, SigmaConditionError
+from sigma.exceptions import SigmaError, SigmaValueError, SigmaConditionError,SigmaRelatedError
 from sigma.pipelines.fortisiem.fortisiem import fortisiem_pipeline
 from sigma.pipelines.fortisiem.config import FortisiemConfig
 from sigma.backends.fortisiem.fortisiem import FortisemBackend 
@@ -29,7 +29,6 @@ def set_argparser():
     argparser.add_argument("--ymlFile", "-f", default=None, help="Used to input one yml file")
     argparser.add_argument("--output", "-o", default=None, help="It's a file used to output results")
     argparser.add_argument("--ruleFile",default=None, help="It's a rule file which needs to be updated.")
-    argparser.add_argument("--ruleType", default=None, help="Rule type.value could be [windows/linux]")
     argparser.add_argument("--ruleStartIndex", default=1, help="Options Rule start id.")
 
 
@@ -189,22 +188,26 @@ def main():
                processing_pipeline = None
                backend = FortisemBackend(processing_pipeline=processing_pipeline)
 
-               ruleId = getRuleId(rulesDicts, sigmaFile, cmdargs.ruleType, ruleIndex)
-               formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId, cmdargs.ruleType)
+               logsource = rule.logsource
+               ruleType = None
+               if logsource is not None:
+                  ruleType = logsource.product
+
+               ruleId = getRuleId(rulesDicts, sigmaFile, ruleType, ruleIndex)
+               formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId)
                xmlRules = backend.convert(rule, formater)
 
                for item in xmlRules:
                     ruleIndex = addNewRule(rulesDicts, item, sigmaFile, ruleIndex)
 
         except OSError as e:
-            print("Failed to open Sigma file %s:\n    %s" % (sigmaFile, str(e)), file=sys.stderr)
+            print("\nFailed to open %s:\n    %s" % (sigmaFile, str(e)), file=sys.stderr)
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
-            print("Sigma file %s is no valid YAML:\n    %s" % (sigmaFile, str(e)), file=sys.stderr)
-        except SigmaConditionError as e:
-            print("Sigma file %s is no valid YAML:\n    %s" % (sigmaFile, str(e)), file=sys.stderr)
+            print("\n%s is no valid YAML:\n    %s" % (sigmaFile, str(e)), file=sys.stderr)
+        except (SigmaConditionError,SigmaRelatedError) as e:
+            print("\n%s is no valid YAML:\n    %s" % (sigmaFile, str(e)), file=sys.stderr)
         except (NotImplementedError, TypeError) as e:
-            print("Sigma file %s converted failed:\n    %s" % (sigmaFile, str(e)),file=sys.stderr)
-
+            print("\n%s converted failed:\n    %s" % (sigmaFile, str(e)),file=sys.stderr)
     
     if cmdargs.ruleFile is None:
         outputStatuRules(rulesDicts, outFile , RULE_STATUS.NEW)

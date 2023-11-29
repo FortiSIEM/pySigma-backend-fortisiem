@@ -214,7 +214,6 @@ class FortisemBackend(TextQueryBackend):
                 isContainWildcards, val = self.convert_str_val(arg.value, state)
                 value_str_list.append(val)
 
-                #print("as_in_expression: %s: %s->%s" % (arg.field, arg.value, val))
 
         value_str_list = sorted(value_str_list)
         if isinstance(cond, ConditionOR):
@@ -263,7 +262,6 @@ class FortisemBackend(TextQueryBackend):
         field = self.escape_and_quote_field(cond.field)
         value = cond.value.regexp 
 
-        #print("eq_val_re: %s: %s->%s" % (field, cond.value.regexp, value))
         return self.re_expression.format(field = field, 
                              value = value)
 
@@ -301,7 +299,6 @@ class FortisemBackend(TextQueryBackend):
         self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
     ) -> Union[str, DeferredQueryExpression]:
         """Conversion of field = string value expressions"""
-        #print("convert_condition_field_eq_val_str: ",  cond.value)
         try:
             isContainWildcards, val = self.convert_str_val(cond.value, state)
             if isContainWildcards:
@@ -310,17 +307,13 @@ class FortisemBackend(TextQueryBackend):
                 expr = self.eq_expression
 
             field=self.escape_and_quote_field(cond.field)
-            #print("eq_val_str: %s: %s->%s" % (cond.field, cond.value, val))
             return expr.format(
                 field=field,
                 value= val,
             )
 
         except TypeError:  # pragma: no cover
-            error = "ERROR: Convert failed when convert_condition_field_eq_val_str"
-            print(error)
-            print(cond.field)
-            print(cond.value)
+            error = f"ERROR: Convert {cond.field}:{cond.value} failed in convert_condition_field_eq_val_str"
             raise NotImplementedError(error)
 
     def convert_condition_field_eq_val_num(
@@ -330,10 +323,7 @@ class FortisemBackend(TextQueryBackend):
         try:
             return self.escape_and_quote_field(cond.field) + self.eq_token + str(cond.value)
         except TypeError:
-            error = "ERROR: Convert failed when  convert_condition_field_eq_val_num"
-            print(error)
-            print(cond.field)
-            print(cond.value)
+            error = f"ERROR: Convert {cond.field}:{cond.value} failed in convert_condition_field_eq_val_num"
             raise NotImplementedError(error)
 
     def convert_condition_or(
@@ -344,7 +334,7 @@ class FortisemBackend(TextQueryBackend):
             converteds = []
             for arg in cond.args:
                if isinstance(arg, ConditionValueExpression):
-                    error = "ERROR: There is no field name when convert Operator 'or'"
+                    error = f"ERROR: There is no field name {arg.value}."
                     raise NotImplementedError(error)
                elif arg is None:
                    continue
@@ -361,9 +351,7 @@ class FortisemBackend(TextQueryBackend):
                     elif type(converted) == str:
                         converteds.append(converted)
                     else:
-                        error = "ERROR: Convert failed in Operator 'or'"
-                        print(error)
-                        print(converted)
+                        error = f"{converted} is not tuple or str."
                         raise NotImplementedError(error)
 
             convertedStr = None
@@ -375,8 +363,7 @@ class FortisemBackend(TextQueryBackend):
                 convertedStr = self.or_token.join(converteds)
             return convertedStr 
         except TypeError:  # pragma: no cover
-            error = "ERROR: Convert failed in Operator 'or'"
-            print(error)
+            error = f"ERROR: Convert failed in convert_condition_or."
             raise NotImplementedError(error)
 
 
@@ -388,7 +375,7 @@ class FortisemBackend(TextQueryBackend):
             converteds = []
             for arg in cond.args:
                if isinstance(arg, ConditionValueExpression):
-                    error = "ERROR: There is no field name when convert Operator 'and'"
+                    error = f"ERROR: There is no field name {arg.value}."
                     raise NotImplementedError(error)
                elif arg is None:
                     continue
@@ -406,9 +393,7 @@ class FortisemBackend(TextQueryBackend):
                     elif type(converted) == str:
                         converteds.append(converted)
                     else:
-                        error = "Convert failed in Operator 'and'"
-                        print(error)
-                        print(converted)
+                        error = f"{converted} is not tuple or str."
                         raise NotImplementedError(error)
 
             convertedStr = None
@@ -420,7 +405,7 @@ class FortisemBackend(TextQueryBackend):
                 convertedStr = self.and_token.join(converteds)
             return convertedStr
         except TypeError:  # pragma: no cover
-            error = "Convert failed in Operator 'and'"
+            error = "Convert failed in convert_condition_and."
             raise NotImplementedError(error)
 
     def convert_condition_not(

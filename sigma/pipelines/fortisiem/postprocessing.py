@@ -22,13 +22,17 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
         self, pipeline: "sigma.processing.pipeline.ProcessingPipeline", rule: SigmaRule, query: str
     ) -> str:
         super().apply(pipeline, rule, query)
-        result = self.formatExpression(query)
-        if not result:
-            errMsg = "The format of condition is not right"
-            print("condition: %s" % query)
+        try:
+            result = self.formatExpression(query)
+            if not result:
+                error = f"Query foramt is not right. query: {query}"
+                raise NotImplementedError(error)
             return result
+        except (NotImplementedError) as e:
+            error = str(e) + f" query: {query}"
+            raise NotImplementedError(error)
 
-        return result
+
 
 
     def getQuoteStr(self, conditionStr):
@@ -40,25 +44,23 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
                 return nextIndex
             else:
                 nextIndex = nextIndex + 1
-        print("ERROR: The condition format is wrong condition in getQuoteStr: ", conditionStr)
-        return None;
+
+        error = "Doubel quote doesn't match."
+        raise NotImplementedError(error)
 
 
 
     def formatParenthesesExpression(self, conditionStr, fullExpressionIsNot):
-        #print("XXXX", conditionStr)
         count = 1;
         nextIndex = 1;
         remainStr = "";
         parenSubContition = None;
         while(nextIndex < len(conditionStr)):
             if conditionStr[nextIndex]== '"':
-                #print("ZZZZ1", conditionStr[nextIndex:])
                 nextQuoteIndex = self.getQuoteStr(conditionStr[nextIndex:])
                 if not nextQuoteIndex:
                     return remainStr, None
                 nextIndex = nextIndex + nextQuoteIndex 
-                #print("ZZZZ2", conditionStr[nextIndex + 1:])
             elif conditionStr[nextIndex]== '(':
                 count = count + 1
             elif conditionStr[nextIndex]== ')':
@@ -72,8 +74,8 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
             nextIndex = nextIndex + 1
         
         if count > 0:
-            print("ERROR: The condition format is wrong condition in formatParenthesesExpression: ", conditionStr) 
-            return remainStr, None
+            error = "Parentheses doesn't match."
+            raise NotImplementedError(error)
         
         return remainStr, parenSubContition
                    
@@ -155,16 +157,16 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
         newCondition = conditionOrg
         part  = re.split("( = | CONTAIN | REGEXP | IN | IS )", newCondition)
         if part is None:
-            print("ERROR: The condition format is wrong condition in getAttOpVal: ", conditionOrg) 
-            return None
+            error = "Key-value doesn't match."
+            raise NotImplementedError(error)
 
         attr = part[0].strip(" ")
         newCondition = newCondition[len(part[0]):].strip(" ")
         
         index = newCondition.find(" ")
         if index == -1:
-            print("ERROR: The condition format is wrong condition in getAttOpVal: ", conditionOrg) 
-            return None
+            error = "Key-value doesn't match."
+            raise NotImplementedError(error)
         
         op = newCondition[0 : index].strip(" ")
         if isNot:
