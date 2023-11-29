@@ -32,8 +32,7 @@ def test_fortisiem_pipeline():
         backend = FortisemBackend(processing_pipeline=processing_pipeline)
 
         ruleId = "PH_Rule_SIGMA_1"
-        ruleType = ""
-        formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId, ruleType)
+        formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId)
         xmlRules = backend.convert(rule, formater)
         file_content = None
         with open("tests/expectRuleFromPipelineTest.xml", 'r') as file:
