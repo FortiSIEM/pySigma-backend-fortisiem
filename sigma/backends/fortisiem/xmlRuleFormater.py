@@ -156,9 +156,11 @@ class FortisiemXMLRuleFormater:
         ET.SubElement(self.ruleRoot, "IncidentTitle")
         ET.SubElement(self.ruleRoot, "active")
         ET.SubElement(self.ruleRoot, "Description")
+        ET.SubElement(self.ruleRoot, "DetectionTechnology")
         self.setElemText("Name", curRuleName)
         self.setElemText("IncidentTitle", curTitleName)
         self.setElemText("active", "true")
+        self.setElemText("DetectionTechnology", "Correlation")
         description = self.formatDescription(description)
         self.setElemText("Description", description)
         if self.yml_file_name is not None:
