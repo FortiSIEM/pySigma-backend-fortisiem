@@ -13,7 +13,6 @@ from sigma.rule import SigmaRule
 @Pipeline
 def fortisiem_pipeline(config: FortisiemConfig, rule: SigmaRule) -> ProcessingPipeline:        # Processing pipelines should be defined as functions that return a ProcessingPipeline object.
     product, service, contition = config.shouldAppendCondition(rule)
-
     processingItemItems = []
     if contition:
         processingItem = ProcessingItem(
@@ -32,7 +31,7 @@ def fortisiem_pipeline(config: FortisiemConfig, rule: SigmaRule) -> ProcessingPi
     replaceProcessingItem = ProcessingItem(
                 identifier=f"fortisiem_field_replace",
                 transformation=FortisiemReplaceDetectionItemTransformation(config, product, service),
-                field_name_conditions=[IncludeFieldCondition(["eventType"])],
+                field_name_conditions=[IncludeFieldCondition(["eventType", "EventID"])],
             )
     processingItemItems.append(replaceProcessingItem)
 

@@ -16,7 +16,6 @@ from sigma.backends.fortisiem.fortisiem import FortisemBackend
 from sigma.backends.fortisiem.xmlRuleFormater import FortisiemXMLRuleFormater 
 sigma_path = os.getcwd()
 sys.path.insert(0, sigma_path)
-
 from tools.output import outputStatuRules,outputRules
 from tools.updateRule import addNewRule, loadRulesXML, RULE_STATUS
 import codecs
@@ -185,7 +184,6 @@ def main():
                    continue
 
                processing_pipeline = fortisiem_pipeline(config, rule)
-               processing_pipeline = None
                backend = FortisemBackend(processing_pipeline=processing_pipeline)
 
                logsource = rule.logsource
@@ -210,7 +208,9 @@ def main():
             print("\n%s converted failed:\n    %s" % (sigmaFile, str(e)),file=sys.stderr)
     
     if cmdargs.ruleFile is None:
-        outputStatuRules(rulesDicts, outFile , RULE_STATUS.NEW)
+        if os.path.isdir(outFile):
+            outFile = outFile + "/SIGMA_new.xml"
+        outputStatuRules(rulesDicts, outFile, RULE_STATUS.NEW)
     else:
         outputRules(rulesDicts, outFile)
 

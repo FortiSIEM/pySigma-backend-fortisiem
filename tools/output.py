@@ -1,9 +1,11 @@
 import os
+import sys
 import csv
 import xml.etree.ElementTree as ET
 from lxml import etree
-from updateRule import RULE_STATUS
-from updateEventTypeFile import *
+from enum import Enum
+from tools.updateRule import RULE_STATUS
+from tools.updateEventTypeFile import *
 
 def prettyXML(elem):
      if elem is None:
@@ -21,13 +23,14 @@ def outputStatuRules(rulesDicts, outFile, status):
     except (IOError, OSError) as e:
         print("Failed to open output file '%s': %s" % (outFile, str(e)), file=sys.stderr)
         exit(-1)
+
     count = 0
     print("<Rules>", file=out)
     for item in rulesDicts["ruleName"].values():
         if status is None:
            if item[1] != RULE_STATUS.DELETE:
               outputRule = item[0]
-              if item[1] in (RULE_STATUS.MODIFIED):
+              if item[1] in (RULE_STATUS.NEW, RULE_STATUS.MODIFIED):
                   if item[2].find("ErrMsg") is not None:
                      continue;
                   outputRule = item[2]
@@ -44,7 +47,7 @@ def outputStatuRules(rulesDicts, outFile, status):
                print(newRulexmlstr, file=out)
             elif item[1] == status:
                 outputRule = item[0]
-                if status == RULE_STATUS.MODIFIED:
+                if status in (RULE_STATUS.NEW, RULE_STATUS.MODIFIED):
                     outputRule = item[2]
                     if item[2].find("ErrMsg") is not None:
                        continue;
@@ -67,7 +70,7 @@ def outputRules(rulesDicts, outFile):
     deleteRuleFile = None
     nochangeRuleFile = None
     onlyLinkChanged = None
-    errorRuleFile = "out/SIGMA_error.xml"
+    errorRuleFile = "SIGMA_error.xml"
     if os.path.isdir(outFile):
         outFile = outFile.rstrip()
         newRuleFile = "%s/SIGMA_new.xml" % (outFile)

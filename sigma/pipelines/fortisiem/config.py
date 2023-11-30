@@ -117,6 +117,9 @@ class FortisiemConfig:
          return tmp, keyword
 
     def convertEvtID2EvtType(self, service, code, provider=None):
+        if not code.isdigit():
+            return code
+
         if provider is not None:
             val, tmp  = self.getEvtTypeByEvtID("Provider_Name", code)
             if val is not None:
@@ -143,11 +146,9 @@ class FortisiemConfig:
             return val
 
         val, keyword = self.getEvtTypeByEvtID(service, code)
-        if val is not None:
-            #evt = val.split(",")
-            #val = ",".join(["\"%s\"" % item for item in evt])
+        if val:
             return val
-        elif keyword is not None:
+        elif keyword:
             if "Win-Sysmon" == keyword:
                 val = "Win-Sysmon-%s-.*" % code
             else:

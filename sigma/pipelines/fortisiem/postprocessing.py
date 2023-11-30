@@ -23,7 +23,7 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
     ) -> str:
         super().apply(pipeline, rule, query)
         try:
-            result = self.formatExpression(query)
+            result = self.formatExpression(query, False, False)
             if not result:
                 error = f"Query foramt is not right. query: {query}"
                 raise NotImplementedError(error)
@@ -66,9 +66,8 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
             elif conditionStr[nextIndex]== ')':
                 count = count - 1;
                 if count == 0:
-                    substr = conditionStr[1:nextIndex];
                     remainStr = conditionStr[ nextIndex + 1:]
-                    parenSubContition = self.formatExpression(conditionStr[1:nextIndex], fullExpressionIsNot)
+                    parenSubContition = self.formatExpression(conditionStr[1:nextIndex], fullExpressionIsNot, True)
                     break
 
             nextIndex = nextIndex + 1
@@ -76,11 +75,12 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
         if count > 0:
             error = "Parentheses doesn't match."
             raise NotImplementedError(error)
-        
+
+
         return remainStr, parenSubContition
                    
 
-    def formatExpression(self, conditionStr, fullExpressionIsNot = False):
+    def formatExpression(self, conditionStr, fullExpressionIsNot = False, needParentheses = False):
         remainStr = str(conditionStr).strip(" ");
         if remainStr.startswith("AND") or remainStr.startswith("OR"):
            return None
@@ -125,6 +125,9 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
                 if subRuleCondition is None:
                     break;
                 
+                if newRuleCondition or remainStr:
+                    subRuleCondition = f"({subRuleCondition})"
+
                 if newRuleCondition is None:
                     newRuleCondition = subRuleCondition
                 else: 
@@ -148,8 +151,6 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
 
         if newRuleCondition is None:
             return None
-        elif countFilter > 1: 
-            return '(%s)' % newRuleCondition.strip(" ")
         else:
             return newRuleCondition.strip(" ")
 

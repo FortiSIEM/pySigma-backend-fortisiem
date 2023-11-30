@@ -27,7 +27,7 @@ class FortisemBackend(TextQueryBackend):
 
     or_token : ClassVar[str] = " OR "
     and_token : ClassVar[str] = " AND "
-    not_token : ClassVar[str] = " NOT "
+    not_token : ClassVar[str] = "NOT"
     eq_token : ClassVar[str] = " = "
 
     field_quote: ClassVar[str] = '"'
@@ -191,7 +191,7 @@ class FortisemBackend(TextQueryBackend):
                 if c == SpecialChars.WILDCARD_MULTI:
                     s += self.wildcard_multi
                     continue
-            elif c in self.re_escape_char:
+            elif c in self.re_escape_char + self.str_quote:
                 s += self.escape_char 
             s += c
 

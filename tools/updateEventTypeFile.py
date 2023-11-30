@@ -1,5 +1,5 @@
 import subprocess
-from updateRule import RULE_STATUS
+from tools.updateRule import RULE_STATUS
 
 def copyEvtType(fileFullPath, destDir):
     fileName = fileFullPath.split("/")[-1]
