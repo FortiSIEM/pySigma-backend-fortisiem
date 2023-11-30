@@ -40,6 +40,9 @@ class FortisiemConfig:
 
                 self.fortisiem_attrs_dict[row[0]] = row[1]
 
+    def getFortiSIEMAttrType(self, attrName):
+        return self.fortisiem_attr_type_dict.get(attrName, "string")
+
     def loadFieldValToFortiSIEMFieldValMap(self, csvFileName):
         with open(csvFileName, newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',')

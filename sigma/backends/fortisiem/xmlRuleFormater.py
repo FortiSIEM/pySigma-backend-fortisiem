@@ -120,8 +120,6 @@ class FortisiemXMLRuleFormater:
 
     def generateRuleHeader(self, sigma_ruleTags):
         rulename = self.formatGroupName("PH_SYS_RULE_THREAT_HUNTING")
-        ruleId = self.getRuleId()
-        # SigmaRuleTag(namespace='attack', name='execution', source=None), SigmaRuleTag(namespace='attack', name='t1055.012', source=None)
         tags = set()
         for item in sigma_ruleTags:
             tags.add(item.name)
@@ -142,14 +140,13 @@ class FortisiemXMLRuleFormater:
 
         result = None
         self.ruleRoot.set('group', rulename)
-        self.ruleRoot.set('id', str(ruleId))
+        if self.ruleId:
+            self.ruleRoot.set('id', str(self.ruleId))
         self.ruleRoot.set('phIncidentCategory', 'Server' )
         self.ruleRoot.set('function', "Security")
         self.ruleRoot.set('subFunction', sub_function_str )
         if technique_str is not None:
             self.ruleRoot.set('technique', technique_str )
-
-        return result,ruleId,technique_str
 
     def generateRuleCommonPart(self, name, description, status, product):
         curRuleName = self.formatRuleName(name, product)

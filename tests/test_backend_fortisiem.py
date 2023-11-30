@@ -28,6 +28,7 @@ def test_fortisiem_backend():
         ruleId = "PH_Rule_SIGMA_1" 
         formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId)
         xmlRules = backend.convert(rule, formater)
+        print(xmlRules[0].strip(" "))
         file_content = None
         with open("tests/expectRule.xml", 'r') as file:
             file_content = file.read()

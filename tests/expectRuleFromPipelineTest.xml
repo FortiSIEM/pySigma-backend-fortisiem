@@ -15,7 +15,7 @@
   </IncidentDef>
   <PatternClause window="300">
     <SubPattern displayName="Filter" name="Filter">
-      <SingleEvtConstr>(ObjectContianAll REGEXP "/owa/" AND ObjectContianAll REGEXP "/powershell") AND (ObjectRe REGEXP "^Object*Re$" OR ObjectRe REGEXP "^Object\\\*Re$") AND ObjectEndWith REGEXP "ObjectEndWithStr$|ObjectEndWithStr\\.*\*AA$" AND ObjectSkipStar = "ObjectSkip\*Star" AND ObjectStar REGEXP "Object.*Star" AND ObjectStartwith REGEXP "^ObjectstartswithStr|^Objectstartswith\\.*\*Str" AND eventType IN ("Win-Security-4656", "Win-Security-4663")</SingleEvtConstr>
+      <SingleEvtConstr>(ObjectContianAll REGEXP "/owa/" AND ObjectContianAll REGEXP "/powershell") AND (ObjectRe REGEXP "^Object*Re$" OR ObjectRe REGEXP "^Object\\\*Re$") AND ObjectEndWith REGEXP "ObjectEndWithStr$|ObjectEndWithStr\\.*\*AA$" AND ObjectSkipStar = "ObjectSkip*Star" AND ObjectStar REGEXP "Object.*Star" AND ObjectStartwith REGEXP "^ObjectstartswithStr|^Objectstartswith\\.*\*Str" AND eventType IN ("Win-Security-4656", "Win-Security-4663")</SingleEvtConstr>
       <GroupByAttr>ObjectContianAll,ObjectEndWith,ObjectRe,ObjectSkipStar,ObjectStar,ObjectStartwith,hostName</GroupByAttr>
       <GroupEvtConstr>COUNT(*) &gt;= 1</GroupEvtConstr>
     </SubPattern>

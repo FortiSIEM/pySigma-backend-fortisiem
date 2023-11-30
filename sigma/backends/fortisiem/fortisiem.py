@@ -184,6 +184,15 @@ class FortisemBackend(TextQueryBackend):
                 e.args = (e.args[0] + msg,)
             raise
 
+    def convert_value_to_str(self, value):
+        s = ""
+        for c in value:
+            if c in self.str_quote + self.escape_char:
+                s += self.escape_char
+            s += c
+
+        return s
+
     def convert_value_to_regstr(self, value):
         s = ""
         for c in value:
@@ -289,8 +298,8 @@ class FortisemBackend(TextQueryBackend):
             val = self.convert_value_to_regstr(value)
             isContainWildcards = True
         else:
-            val = self.convert_value_str(value, state)
-            val = "%s" % val[1:-1]
+            breakpoint()
+            val = self.convert_value_to_str(value)
         return isContainWildcards, val
 
 

@@ -8,12 +8,15 @@ import xml.etree.ElementTree as ET
 from lxml import etree
 from sigma.rule import SigmaDetection
 from sigma.processing.postprocessing import QueryPostprocessingTransformation
+from sigma.pipelines.fortisiem.config import FortisiemConfig
 from sigma.rule import SigmaRule
 from typing import ClassVar,Dict,Union,List
 
 class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation):
-    def __init__(self):
+    config = None
+    def __init__(self, config):
         super().__init__();
+        self.config = config
 
     def __post_init__(self):
         return
@@ -179,4 +182,24 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
                 op = "NOT " + op
 
         val = newCondition[index:].strip(" ")
+        val = self.resetValByAttrType(attr, val, op)
         return "%s %s %s" % (attr, op, val) 
+
+    def resetValByAttrType(self, attrName, attrVal, op):
+        if op not in ["=","!=","IN", "NOT IN"]:
+            return attrVal
+
+        attrType = self.config.getFortiSIEMAttrType(attrName)
+        if attrType == "string":
+            return attrVal
+        
+        breakpoint()
+        vals = attrVal.strip("\"").split(",")
+        vals = [ val.strip("\"") for val in vals]
+        finalVal = ",".join(vals)
+        if len(vals) > 1:
+            return f"({finalVal})"
+        return finalVal
+        
+
+

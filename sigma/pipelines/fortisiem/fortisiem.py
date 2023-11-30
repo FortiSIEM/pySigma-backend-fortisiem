@@ -49,7 +49,7 @@ def fortisiem_pipeline(config: FortisiemConfig, rule: SigmaRule) -> ProcessingPi
         items=processingItemItems,
         postprocessing_items=[
             QueryPostprocessingItem(
-                transformation=QueryToFortisiemExpressionTransformation(),
+                transformation=QueryToFortisiemExpressionTransformation(config),
                 rule_condition_linking=any,
                 rule_conditions=[
                 ],
