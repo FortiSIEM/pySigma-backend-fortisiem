@@ -80,7 +80,7 @@ def outputRules(rulesDicts, outFile):
         errorRuleFile = "%s/SIGMA_error.xml" % (outFile)
         onlyLinkChanged = "%s/SIGMA_FileChange.xml" % (outFile)
 
-        updateEventType(rulesDicts["ruleName"], outFile)
+        #updateEventType(rulesDicts["ruleName"], outFile)
     else:# os.path.isfile(outFile):
         newRuleFile = outFile 
    

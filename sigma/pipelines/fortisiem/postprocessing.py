@@ -173,6 +173,11 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
             raise NotImplementedError(error)
         
         op = newCondition[0 : index].strip(" ")
+        val = newCondition[index:].strip(" ")
+        if val == "\"-\"":
+            val = "NULL"
+            op = "IS"
+
         if isNot:
             if op == '=':
                 op = '!='
@@ -181,7 +186,8 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
             else:
                 op = "NOT " + op
 
-        val = newCondition[index:].strip(" ")
+           
+
         val = self.resetValByAttrType(attr, val, op)
         return "%s %s %s" % (attr, op, val) 
 
@@ -192,10 +198,8 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
         attrType = self.config.getFortiSIEMAttrType(attrName)
         if attrType == "string":
             return attrVal
-        
-        breakpoint()
-        vals = attrVal.strip("\"").split(",")
-        vals = [ val.strip("\"") for val in vals]
+        vals = attrVal.strip(" ").strip("(").strip(")").split(",")
+        vals = [ val.strip(" ").strip("\"") for val in vals]
         finalVal = ",".join(vals)
         if len(vals) > 1:
             return f"({finalVal})"

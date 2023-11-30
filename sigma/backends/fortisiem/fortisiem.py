@@ -298,7 +298,6 @@ class FortisemBackend(TextQueryBackend):
             val = self.convert_value_to_regstr(value)
             isContainWildcards = True
         else:
-            breakpoint()
             val = self.convert_value_to_str(value)
         return isContainWildcards, val
 
