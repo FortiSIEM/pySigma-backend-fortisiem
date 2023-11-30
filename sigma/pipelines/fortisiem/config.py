@@ -118,7 +118,7 @@ class FortisiemConfig:
          keyword = tmp.get("keyword", None) 
          tmp = tmp.get(code, None)
          return tmp, keyword
-
+    
     def convertEvtID2EvtType(self, service, code, provider=None):
         if not code.isdigit():
             return code

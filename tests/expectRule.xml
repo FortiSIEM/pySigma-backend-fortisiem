@@ -3,6 +3,7 @@
   <IncidentTitle>Title name</IncidentTitle>
   <active>true</active>
   <Description>Description</Description>
+  <DetectionTechnology>Correlation</DetectionTechnology>
   <SigmaFileName>tests/test.yml</SigmaFileName>
   <SIGMAStatus>test</SIGMAStatus>
   <ignoreSIGMAUpdate>false</ignoreSIGMAUpdate>

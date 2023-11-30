@@ -40,10 +40,16 @@ class FortisiemReplaceDetectionItemTransformation(DetectionItemTransformation):
             if isinstance(d, SigmaDetection):
                 for detection_item in d.detection_items:
                     if detection_item.field == attrName:
-                        values.append(detection_item.value)
+                        if type(detection_item.value) is list:
+                            values = values + list(detection_item.value)
+                        else:
+                            values.append(detection_item.value)
             else:#sigmaDetectionItem
                 if d.field == attrName:
-                    values.append(d.value)
+                    if type(d.value) is list:
+                        values = values + list(d.value)
+                    else:
+                        values.append(d.value)
         if len(values) == 0:
             return None 
         return values
@@ -52,7 +58,9 @@ class FortisiemReplaceDetectionItemTransformation(DetectionItemTransformation):
         super().apply_detection(detection)
         newItems = []
 
-        provider = self.getValueByName(detection, "Provider_Name") 
+        provider = self.getValueByName(detection, "_win_providerName_removed") 
+        if provider and  len(provider) > 0:
+            provider = provider[0]
                  
         for d in detection.detection_items:
             if not isinstance(d, self.ReplaceSigmaDetectionItem):
