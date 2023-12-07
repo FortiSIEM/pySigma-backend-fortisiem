@@ -189,7 +189,25 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
            
 
         val = self.resetValByAttrType(attr, val, op)
-        return "%s %s %s" % (attr, op, val) 
+        return self.formCondition(attr, op, val)
+ 
+    #We parse the "User" field as domain\user, so we need to consider the domain.
+    #If Sigma has 'user contain', we should convert to user contain OR domain contain
+    #If Sigma has 'user endwith', we should convert to user endwith
+    #If Sigma has 'user startwith', we should convert to user startwith OR domain startwith (in case the user field has no domain)
+    def formCondition(self, attr, op, val):
+       if attr != "user":
+           return f"{attr} {op} {val}";
+
+       if op != "REGEXP" and op != "CONTAIN":
+           return f"{attr} {op} {val}";
+
+       if val.strip('\"')[-1:] != '$':
+           return f"({attr} {op} {val} OR domain {op} {val})"
+
+       return f"{attr} {op} {val}";
+
+
 
     def resetValByAttrType(self, attrName, attrVal, op):
         if op not in ["=","!=","IN", "NOT IN"]:
