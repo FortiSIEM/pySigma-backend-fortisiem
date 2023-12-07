@@ -201,10 +201,13 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
 
        if op != "REGEXP" and op != "CONTAIN":
            return f"{attr} {op} {val}";
-
-       if val.strip('\"')[-1:] != '$':
+       
+       val.replace("\\\\", "#TEMP_TOKEN#")
+       if val.strip('\"')[-1:] != '$' or val.strip('\"')[-2:] == '\\$':
+           val.replace("#TEMP_TOKEN#", "\\\\")
            return f"({attr} {op} {val} OR domain {op} {val})"
 
+       val.replace("#TEMP_TOKEN#", "\\\\")
        return f"{attr} {op} {val}";
 
 
