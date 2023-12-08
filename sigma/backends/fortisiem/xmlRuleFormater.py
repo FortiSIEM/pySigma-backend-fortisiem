@@ -3,7 +3,7 @@ import re
 import copy
 import xml.etree.ElementTree as ET
 from lxml import etree
-from sigma.rule import SigmaRule,SigmaDetection
+from sigma.rule import SigmaRule,SigmaDetection,SigmaLevel
 from sigma.pipelines.fortisiem.config import FortisiemConfig
 class FortisiemXMLRuleFormater:
     ruleRoot =None 
@@ -181,13 +181,13 @@ class FortisiemXMLRuleFormater:
 
 
     def generateRuleIncidentDef(self, name, level, attrset):
-        if level == "low":
+        if level == SigmaLevel.LOW:
             severity = 3
-        elif level == "medium":
+        elif level == SigmaLevel.MEDIUM:
             severity = 5
-        elif level == "high":
+        elif level == SigmaLevel.HIGH:
             severity = 7
-        elif level == "critical":
+        elif level == SigmaLevel.CRITICAL:
             severity = 9
         else:
             severity = 1
