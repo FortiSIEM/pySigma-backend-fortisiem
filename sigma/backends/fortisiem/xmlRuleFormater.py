@@ -325,6 +325,7 @@ class FortisiemXMLRuleFormater:
         self.generateRuleCommonPart(name, des, status, product)
         self.generateRuleIncidentDef(name, level, incidentDefAttr)
         self.generateRulePatternClause(conditionStr, groupByAttr)
+        self.generateRuleTriggerEventDisplay(displayAttr)
         return self.prettyXML(self.ruleRoot)
 
     def prettyXML(self, elem):

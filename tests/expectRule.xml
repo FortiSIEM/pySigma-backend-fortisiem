@@ -21,4 +21,7 @@
       <GroupEvtConstr>COUNT(*) &gt;= 1</GroupEvtConstr>
     </SubPattern>
   </PatternClause>
+  <TriggerEventDisplay>
+    <AttrList>phRecvTime,EventID,ObjectContianAll,ObjectEndWith,ObjectRe,ObjectSkipStar,ObjectStar,ObjectStartwith,rawEventMsg</AttrList>
+  </TriggerEventDisplay>
 </Rule>
