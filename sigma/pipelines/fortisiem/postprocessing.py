@@ -178,6 +178,11 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
             val = "NULL"
             op = "IS"
 
+        if op == "REGEXP":
+            if len(val) > 2048: 
+                error = "Pattern too long"
+                raise NotImplementedError(error)
+
         if isNot:
             if op == '=':
                 op = '!='
