@@ -175,7 +175,7 @@ class FortisiemConfig:
             vals = self.formatEvtTypeVal(str(value), product, service, provider);
             return vals
         else:
-            print("WARNING: Unsupport to convert value of %s" % fieldName)
+            #print("WARNING: Unsupport to convert value of %s" % fieldName)
             return None
 
     def shouldAppendCondition(self, rule: SigmaRule):
@@ -195,8 +195,8 @@ class FortisiemConfig:
 
             if service in Windows_logsource_Condition_map:
                 return product, service, Windows_logsource_Condition_map[service]
-        else:
-            print("WARNING: Unsupport to get condition for %s in getConditionByLogsource" % product )
+        #else:
+            #print("WARNING: Unsupport to get condition for %s in getConditionByLogsource" % product )
         return product, service, None
 
     def getAllAttrName(self, rule: SigmaRule):
