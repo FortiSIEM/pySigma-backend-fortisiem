@@ -24,8 +24,21 @@ class FortisiemConfig:
     skip_rule_by_logsource_dict= {}
     event_id_2_event_type_dict = {}
     technique_dict = {}
+    logsource_Condition_map = {}
+
 
     #def __init__(self):
+    def loadLogsourceToETMap(self, csvFileName):
+        with open(csvFileName, newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',')
+            for row in spamreader:
+                if len(row) < 3:
+                    continue;
+                else:
+                    tmp = self.logsource_Condition_map.get(row[0].lower(), None)
+                    if tmp is None:
+                        self.logsource_Condition_map[row[0]] = {}
+                    self.logsource_Condition_map[row[0]][row[1]] = {"eventType": row[2]}
      
     def loadFieldNameToFortiSIEMAttrNameMap(self, csvFileName):
         with open(csvFileName, newline='') as csvfile:
@@ -193,10 +206,14 @@ class FortisiemConfig:
             if "EventID" in currArr:
                 return  product, service, None
 
-            if service in Windows_logsource_Condition_map:
-                return product, service, Windows_logsource_Condition_map[service]
-        #else:
-            #print("WARNING: Unsupport to get condition for %s in getConditionByLogsource" % product )
+        serviceETMap = self.logsource_Condition_map.get(product, None)
+        if not serviceETMap:
+            return product, service, None
+
+        if service in serviceETMap:
+            return product, service, serviceETMap[service]
+        else:
+            print("WARNING: Unsupport to get condition for %s in getConditionByLogsource" % product )
         return product, service, None
 
     def getAllAttrName(self, rule: SigmaRule):

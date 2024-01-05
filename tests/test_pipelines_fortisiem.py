@@ -27,6 +27,7 @@ def test_fortisiem_pipeline():
     config.loadMitreAttackMatrixFile("tools/config/MITRE-Attack-matrix.csv");
     config.loadFieldNameToFortiSIEMAttrNameMap("tools/config/winAttr2InternalAttr.csv");
     config.loadFieldValToFortiSIEMFieldValMap("tools/config/WinCode2ET.csv")
+    config.loadLogsourceToETMap("tools/config/Logsource2ET.csv")
     for rule in sigmaCollection.rules:
         processing_pipeline = fortisiem_pipeline(config, rule)
         backend = FortisemBackend(processing_pipeline=processing_pipeline)

@@ -170,6 +170,7 @@ def main():
     config.loadFieldNameToFortiSIEMAttrNameMap("tools/config/winAttr2InternalAttr.csv");
     config.loadFieldValToFortiSIEMFieldValMap("tools/config/WinCode2ET.csv")
     config.loadLogsourceUsedToSkipRuleMap("tools/config/SkipRuleByLogsource.csv")
+    config.loadLogsourceToETMap("tools/config/Logsource2ET.csv")
 
     for sigmaFile in sigmaFileList:
         try:

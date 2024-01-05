@@ -1,0 +1,13 @@
+#product,service|category,eventType
+#######
+windows,process_creation,Win-Sysmon-1-Create-Process,
+windows,network_connection,Win-Sysmon-3-Network-Connect*,
+windows,dns_query,Win-Sysmon-22-DNS-Query,
+windows,registry_event,Win-Sysmon-12-Registry-*|Win-Sysmon-13-Registry-*|Win-Sysmon-14-Registry-*,
+windows,file_event,Win-Sysmon-11-FileCreate,
+windows,process_access,Win-Sysmon-10-ProcessAccess,
+windows,image_load,Win-Sysmon-7-Image-Loaded,
+windows,driver_load,Win-Sysmon-6-Driver-Loaded,
+windows,process_termination,Win-Sysmon-5-Process-Terminated,
+#####
+linux,file_event,FSM_LINUX_FILE_*

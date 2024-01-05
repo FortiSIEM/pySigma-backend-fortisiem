@@ -23,6 +23,7 @@ def test_fortisiem_backend():
     sigmaCollection = loadYml(sigmaFile) 
     config = FortisiemConfig();
     config.loadMitreAttackMatrixFile("tools/config/MITRE-Attack-matrix.csv");
+    config.loadLogsourceToETMap("tools/config/Logsource2ET.csv")
     for rule in sigmaCollection.rules:
         backend = FortisemBackend(processing_pipeline=None)
         ruleId = "PH_Rule_SIGMA_1" 

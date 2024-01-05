@@ -11,7 +11,7 @@
     <Include all="true"/>
     <Exclude/>
   </CustomerScope>
-  <IncidentDef eventType="PH_RULE_Title_name" severity="1">
+  <IncidentDef eventType="PH_RULE_Title_name" severity="7">
     <ArgList>ObjectContianAll = Filter.ObjectContianAll,ObjectEndWith = Filter.ObjectEndWith,ObjectRe = Filter.ObjectRe,ObjectSkipStar = Filter.ObjectSkipStar,ObjectStar = Filter.ObjectStar,ObjectStartwith = Filter.ObjectStartwith,hostName = Filter.hostName</ArgList>
   </IncidentDef>
   <PatternClause window="300">
