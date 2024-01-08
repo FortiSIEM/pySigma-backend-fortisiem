@@ -212,8 +212,8 @@ class FortisiemConfig:
 
         if service in serviceETMap:
             return product, service, serviceETMap[service]
-        else:
-            print("WARNING: Unsupport to get condition for %s in getConditionByLogsource" % product )
+        #else:
+        #    print("WARNING: Unsupport to get condition for %s in getConditionByLogsource" % product )
         return product, service, None
 
     def getAllAttrName(self, rule: SigmaRule):
