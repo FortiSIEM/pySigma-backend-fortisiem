@@ -34,6 +34,8 @@ def set_argparser():
     argparser.add_argument("--ruleToCsv",action='store_true', help="Generate Csv file from rule files.")
     argparser.add_argument("--reportToCsv",action='store_true', help="Generate Csv file from report file.")
     argparser.add_argument("--diff",action='store_true', help="Get deleted rules between two rule files")
+    #If forGui is False, the xml format can be imported into FortiSIEM by backend command
+    argparser.add_argument("--forGui",action='store_true', help="The XML format can be imported into FortiSIEM by GUI")
     return argparser
 
 def getRuleId(rulesDicts, filePath, ruleType, ruleIndex):
@@ -157,6 +159,10 @@ def main():
     if cmdargs.ymlFile:
         sigmaFileList.append(cmdargs.ymlFile);
      
+    forGUI = False
+    if cmdargs.forGui:
+        forGUI = True
+
     rulesDicts = {}
     noEvtTyRule = []
     ruleIndex = int(cmdargs.ruleStartIndex)
@@ -192,9 +198,14 @@ def main():
                if logsource is not None:
                   ruleType = logsource.product
 
-               ruleId = getRuleId(rulesDicts, sigmaFile, ruleType, ruleIndex)
-               formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId)
-               xmlRules = backend.convert(rule, formater)
+               if forGUI:
+                   formater = FortisiemXMLRuleFormater(config, sigmaFile, None, forGUI)
+                   xmlRules = backend.convert(rule, formater)
+               else:
+                   ruleId = getRuleId(rulesDicts, sigmaFile, ruleType, ruleIndex)
+                   formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId, forGUI)
+                   xmlRules = backend.convert(rule, formater)
+
 
                for item in xmlRules:
                     ruleIndex = addNewRule(rulesDicts, item, sigmaFile, ruleIndex)

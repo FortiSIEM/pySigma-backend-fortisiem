@@ -1,0 +1,27 @@
+<Rule group="PH_SYS_RULE_THREAT_HUNTING" phIncidentCategory="Server" function="Security" subFunction="Discovery" technique="T1012">
+  <Name>Windows: Title name</Name>
+  <IncidentTitle>Title name</IncidentTitle>
+  <active>true</active>
+  <Description>Description</Description>
+  <DetectionTechnology>Correlation</DetectionTechnology>
+  <SigmaFileName>tests/test.yml</SigmaFileName>
+  <SIGMAStatus>test</SIGMAStatus>
+  <ignoreSIGMAUpdate>false</ignoreSIGMAUpdate>
+  <CustomerScope groupByEachCustomer="true">
+    <Include all="true"/>
+    <Exclude/>
+  </CustomerScope>
+  <IncidentDef eventType="PH_RULE_Title_name" severity="7">
+    <ArgList>EventID = Filter.EventID,ObjectContianAll = Filter.ObjectContianAll,ObjectEndWith = Filter.ObjectEndWith,ObjectRe = Filter.ObjectRe,ObjectSkipStar = Filter.ObjectSkipStar,ObjectStar = Filter.ObjectStar,ObjectStartwith = Filter.ObjectStartwith,hostName = Filter.hostName</ArgList>
+  </IncidentDef>
+  <PatternClause window="300">
+    <SubPattern displayName="Filter" name="Filter">
+      <SingleEvtConstr>( ( ObjectContianAll REGEXP "/owa/" AND ObjectContianAll REGEXP "/powershell" ) AND ( ObjectRe REGEXP "^Object*Re$" OR ObjectRe REGEXP "^Object\\\*Re$" ) AND EventID IN ("4656", "4663") AND ObjectEndWith REGEXP "ObjectEndWithStr$|ObjectEndWithStr\\.*\*AA$" AND ObjectSkipStar = "ObjectSkip*Star" AND ObjectStar REGEXP "Object.*Star" AND ObjectStartwith REGEXP "^ObjectstartswithStr|^Objectstartswith\\.*\*Str" )</SingleEvtConstr>
+      <GroupByAttr>EventID,ObjectContianAll,ObjectEndWith,ObjectRe,ObjectSkipStar,ObjectStar,ObjectStartwith,hostName</GroupByAttr>
+      <GroupEvtConstr>COUNT(*) &gt;= 1</GroupEvtConstr>
+    </SubPattern>
+  </PatternClause>
+  <TriggerEventDisplay>
+    <AttrList>phRecvTime,EventID,ObjectContianAll,ObjectEndWith,ObjectRe,ObjectSkipStar,ObjectStar,ObjectStartwith,rawEventMsg</AttrList>
+  </TriggerEventDisplay>
+</Rule>

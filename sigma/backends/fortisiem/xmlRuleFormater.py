@@ -7,16 +7,20 @@ from sigma.rule import SigmaRule,SigmaDetection,SigmaLevel
 from sigma.pipelines.fortisiem.config import FortisiemConfig
 class FortisiemXMLRuleFormater:
     ruleRoot =None 
-
     ruleId = None;
     yml_file_name = None
     config = None
 
-    def __init__(self, config: FortisiemConfig, file_name, ruleId):
+    def __init__(self, config: FortisiemConfig, file_name, ruleId, forFortiSIEMGUI=True):
         self.ruleId = ruleId;
+        if forFortiSIEMGUI: #ruleId must be empty when xml for GUI
+            self.ruleId = None
+        else:
+            if not self.ruleId: ##ruleId must have value when xml for Backend
+                self.ruleId="PH_Rule_SIGMA_1"
+
         self.yml_file_name = file_name
         self.config = config
-
 
     def formatDescription(self, des):
         des = des.replace('\n', ' ')
@@ -24,9 +28,9 @@ class FortisiemXMLRuleFormater:
 
     def formatRuleName(self, name, product):
         #ruleName has invalid characters. It only accepts: a-zA-Z0-9 \/:.$-
-        ruleName = re.sub('\s*[^a-zA-Z0-9 \/:.$_\'\"-]+\s*', ' ', name)
-        ruleName = re.sub('_', '-', ruleName)
-        ruleName = re.sub('[\'"\(\)+,]*', '', ruleName)
+        ruleName = re.sub(r'\s*[^a-zA-Z0-9 \/:.$_\'\"-]+\s*', ' ', name)
+        ruleName = re.sub(r'_', '-', ruleName)
+        ruleName = re.sub(r'[\'"\(\)+,]*', '', ruleName)
 
         if product != "windows":
             return ruleName
@@ -47,19 +51,19 @@ class FortisiemXMLRuleFormater:
 
     def formatRuleEventType(self, ruleET):
         #rule event type has invalid characters. It only accepts: A-z,0-9,_
-        ruleET = re.sub('\W+', '_', ruleET)
-        ruleET = re.sub('_+', '_', ruleET)
+        ruleET = re.sub(r'\W+', '_', ruleET)
+        ruleET = re.sub(r'_+', '_', ruleET)
         ruleET = ruleET.strip('_')
         return ruleET
 
     def formatRuleTitle(self, name):
         #IncidentTitle has invalid characters. It only accepts: a-zA-Z0-9 _$-
-        titleName = re.sub('\s*[^a-zA-Z0-9 _-]+\s*', ' ', name)
+        titleName = re.sub(r'\s*[^a-zA-Z0-9 _-]+\s*', ' ', name)
         return titleName;
 
     def formatRuleEvtType(self, name):
         #IncidentTitle has invalid characters. It only accepts: a-zA-Z0-9 _$-
-        tmp = re.sub('\s*[^a-zA-Z0-9 _]+\s*', ' ', name)
+        tmp = re.sub(r'\s*[^a-zA-Z0-9 _]+\s*', ' ', name)
         tmp = tmp.replace(" ", "_")
         ruleEvtType="PH_RULE_%s" % tmp
         return ruleEvtType
@@ -126,15 +130,15 @@ class FortisiemXMLRuleFormater:
 
         technique = []
         for tag in tags:
-            match = re.search('(t|T)(\d+\.\d+|\d+)\s*', tag)
+            match = re.search(r'(t|T)(\d+\.\d+|\d+)\s*', tag)
             if match is not None:
                 tag = tag[1:]
                 technique.append("T%s" % tag)
             else:
-                match = re.search('\d', tag)
+                match = re.search(r'\d', tag)
                 if match is not None:
                     continue
-                tag = re.sub('_',' ', tag).title()
+                tag = re.sub(r'_',' ', tag).title()
         
         sub_function_str, technique_str= self.formatSubFunctionAndTechniqueId(technique)
 

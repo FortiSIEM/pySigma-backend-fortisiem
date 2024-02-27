@@ -18,27 +18,19 @@ def loadYml(file_path):
         return ymlRule;
     return None
 
-def test_fortisiem_pipeline():
+def test_fortisiem_backend():
     sigmaFile = "tests/test.yml"
-    sigmaCollection = loadYml(sigmaFile)
+    sigmaCollection = loadYml(sigmaFile) 
     config = FortisiemConfig();
     config.loadMitreAttackMatrixFile("tools/config/MITRE-Attack-matrix.csv");
-    config = FortisiemConfig();
-    config.loadMitreAttackMatrixFile("tools/config/MITRE-Attack-matrix.csv");
-    config.loadFieldNameToFortiSIEMAttrNameMap("tools/config/winAttr2InternalAttr.csv");
-    config.loadFieldValToFortiSIEMFieldValMap("tools/config/WinCode2ET.csv")
     config.loadLogsourceToETMap("tools/config/Logsource2ET.csv")
     for rule in sigmaCollection.rules:
-        processing_pipeline = fortisiem_pipeline(config, rule)
-        backend = FortisemBackend(processing_pipeline=processing_pipeline)
-
-        ruleId = "PH_Rule_windows_SIGMA_1"
-        formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId, False)
+        backend = FortisemBackend(processing_pipeline=None)
+        ruleId = "PH_Rule_SIGMA_1" 
+        formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId)
         xmlRules = backend.convert(rule, formater)
         print(xmlRules[0].strip(" "))
         file_content = None
-        with open("tests/expectRuleFromPipelineTest.xml", 'r') as file:
+        with open("tests/expectRuleForFortiSIEMGUI.xml", 'r') as file:
             file_content = file.read()
-
         assert xmlRules[0].strip(" ") == file_content.strip(" ")
-
