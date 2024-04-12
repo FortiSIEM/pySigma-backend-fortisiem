@@ -192,7 +192,7 @@ def main():
 
                processing_pipeline = fortisiem_pipeline(config, rule)
                backend = FortisemBackend(processing_pipeline=processing_pipeline)
-
+               
                logsource = rule.logsource
                ruleType = None
                if logsource is not None:

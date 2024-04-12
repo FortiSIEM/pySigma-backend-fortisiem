@@ -15,6 +15,7 @@ from sigma.types import (
     SigmaString,
     SigmaRegularExpression,
     SpecialChars,
+    SigmaCIDRExpression
 )
 
 class FortisemBackend(TextQueryBackend):
@@ -36,11 +37,13 @@ class FortisemBackend(TextQueryBackend):
     str_quote : ClassVar[str] = '"'
     escape_char : ClassVar[str] = "\\"
     wildcard_multi : ClassVar[str] = ".*"
-    wildcard_single : ClassVar[str] = ".*"
+    wildcard_single : ClassVar[str] = "?"
     add_escaped : ClassVar[str] = "\\"
 
+    default_field_name: ClassVar[str] = "rawEventMsg"
     field_null_expression: ClassVar[str] = "{field} IS NULL"
     contain_expression : ClassVar[str] = "{field} CONTAIN \"{value}\"" 
+    contain_expression1 : ClassVar[str] = "{field} CONTAIN {value}" 
     re_expression : ClassVar[str] = "{field} REGEXP \"{value}\""
     eq_expression : ClassVar[str] = "{field} = \"{value}\""
     re_escape_char : ClassVar[str] = "*\\.()[]|{}^$+!?"
@@ -200,10 +203,13 @@ class FortisemBackend(TextQueryBackend):
                 if c == SpecialChars.WILDCARD_MULTI:
                     s += self.wildcard_multi
                     continue
+                elif c == SpecialChars.WILDCARD_SINGLE:
+                    s += self.escape_char 
+                    s += self.wildcard_single
+                    continue
             elif c in self.re_escape_char + self.str_quote:
                 s += self.escape_char 
             s += c
-
         return s
 
     def convert_condition_as_in_expression(
@@ -219,7 +225,6 @@ class FortisemBackend(TextQueryBackend):
                     val = "%s" % str(arg.value)
                     value_str_list.append(val)
                     continue
-
                 isContainWildcards, val = self.convert_str_val(arg.value, state)
                 value_str_list.append(val)
 
@@ -276,8 +281,18 @@ class FortisemBackend(TextQueryBackend):
 
     def convert_condition_field_eq_val_cidr(self, cond : ConditionFieldEqualsValueExpression, state : "sigma.conversion.state.ConversionState"):
         expr = "{field}" + self.eq_token + "\"{value}\""
-        return  expr.format( field = self.escape_and_quote_field(cond.field), 
-                             value = self.escape_and_quote_field(cond.value))
+        value = ""
+        if type(cond.value) == SigmaCIDRExpression:
+            value = cond.value.cidr
+        else:
+           value = cond.value
+      
+        value = self.escape_and_quote_field(value)
+        if value is None:
+           error = f"ERROR: Failed to quote value for {type(cond.value)} when convert_condition_field_eq_val_cidr"
+           raise NotImplementedError(error)
+
+        return  expr.format( field = self.escape_and_quote_field(cond.field), value = value)
 
     def convert_str_val(self, value: SigmaString, state: ConversionState):
         isContainWildcards = False
@@ -341,14 +356,19 @@ class FortisemBackend(TextQueryBackend):
         try:
             converteds = []
             for arg in cond.args:
-               if isinstance(arg, ConditionValueExpression):
-                    error = f"ERROR: There is no field name {arg.value}."
-                    raise NotImplementedError(error)
-               elif arg is None:
-                   continue
-
                converted = None 
-               if self.compare_precedence(cond, arg):
+               if arg is None:
+                   continue
+               if isinstance(arg, ConditionValueExpression):
+                    if isinstance(arg.value, SigmaString):
+                       val = str(arg.value).replace('"', "\\\"");
+                       converted = self.contain_expression.format(
+                            field = self.escape_and_quote_field(self.default_field_name),
+                            value = val)
+                    else:
+                        error = f"ERROR: Convert failed ConditionValueExpression in convert_condition_or."
+                        raise NotImplementedError(error)
+               elif self.compare_precedence(cond, arg):
                    converted = self.convert_condition(arg, state)
                else:
                    converted = self.convert_condition_group(arg, state)
@@ -382,14 +402,19 @@ class FortisemBackend(TextQueryBackend):
         try:
             converteds = []
             for arg in cond.args:
-               if isinstance(arg, ConditionValueExpression):
-                    error = f"ERROR: There is no field name {arg.value}."
-                    raise NotImplementedError(error)
-               elif arg is None:
-                    continue
-
                converted = None
-               if self.compare_precedence(cond, arg):
+               if arg is None:
+                    continue
+               elif isinstance(arg, ConditionValueExpression):
+                    if isinstance(arg.value, SigmaString):
+                       val = str(arg.value).replace('"', "\\\"");
+                       converted = self.contain_expression.format(
+                            field = self.escape_and_quote_field(self.default_field_name),
+                            value = val)
+                    else:
+                        error = f"ERROR: Convert failed ConditionValueExpression in convert_condition_and."
+                        raise NotImplementedError(error)
+               elif self.compare_precedence(cond, arg):
                    converted = self.convert_condition(arg, state)
                else:
                    converted = self.convert_condition_group(arg, state)
@@ -422,7 +447,6 @@ class FortisemBackend(TextQueryBackend):
         """Conversion of NOT conditions."""
         if len(cond.args) == 0:
             return None
-
         return super().convert_condition_not(cond, state)
 
 

@@ -54,11 +54,9 @@ def loadRulesXML(RuleFile, ymlFileList):
 
         filePath = rule.find('SigmaFileName').text.strip(' ')
         newfilePath = filePath
-        '''
         newfilePath = convertOldPath2NewPath(renameFileMap, filePath, ymlfileNames)
         #if filePath != newfilePath:
         #   print("%s,%s" % (filePath, newfilePath))
-        '''
         newname = newfilePath.split("/")[-1]
         rulesDicts["filePath"][newname.lower()] = ruleName;
 
@@ -82,7 +80,7 @@ def loadRenameFileMap():
             spamreader = csv.reader(csvfile, delimiter=',')
             for row in spamreader:
                 if len(row) == 3:
-                    if row[0] == "FULLPATH" :
+                    if row[0] == "FULLPATH":
                         if row[0] not in RenameFileMap.keys():
                             RenameFileMap[row[0]] = {}
                         RenameFileMap[row[0]][row[1]]=row[2];
@@ -212,6 +210,10 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
              ruleId = oldRule.get('id');
              newRule.set('id', ruleId)
              
+             filePath1 = newRule.find('SigmaFileName').text.strip(' ')
+             for elem in newRule.iter('SigmaFileName'):
+                 elem.text = f"https://github.com/SigmaHQ/sigma/blob/master/{filePath1}"
+
              if not diffRules(newRule, oldRule):
                  #print("No Change Rule %s" % filePath)
                  #SIGMAStatus = newRule.find('SIGMAStatus')
@@ -221,9 +223,9 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
                  addUpdatedStatus(newRule, RULE_STATUS.NOCHANGE)
                  filePath = oldRule.find('SigmaFileName').text.strip(' ')
                  filePath1 = newRule.find('SigmaFileName').text.strip(' ')
-                 if filePath != filePath1:
+                 if filePath1 not in filePath:
                      for elem in oldRule.iter('SigmaFileName'):
-                         elem.text = filePath1
+                         elem.text = filePath1 
                      des = newRule.find('Description').text.strip(' ')
                      for elem in oldRule.iter('Description'):
                          elem.text = des
@@ -234,15 +236,46 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
              else: # filterstr1 != filterstr2 or groupbystr1 != groupbystr2:
                  #print("%s\n%s\n%s\n%s" % (filterstr1,filterstr2,groupbystr1,groupbystr2))
                  print("Modified Rule %s" % filePath)
-                 eventType = oldRule.find('IncidentDef').get('eventType')
-                 for elem in newRule.iter('IncidentDef'):
-                     elem.set('eventType', eventType)
-                 addUpdatedStatus(newRule, RULE_STATUS.MODIFIED)
-                 rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.MODIFIED, newRule)
+                 finialNewRule = updateAttrFromOldToNew(oldRule, newRule) 
+                 addUpdatedStatus(finialNewRule, RULE_STATUS.MODIFIED)
+                 rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.MODIFIED, finialNewRule)
         else:
             ruleIndex = ruleIndex + 1
             #print("New Rule %s" % filePath)
             addUpdatedStatus(newRule, RULE_STATUS.NEW)
             rulesDicts["ruleName"][ruleName] = (None, RULE_STATUS.NEW, newRule)
-
         return ruleIndex
+
+def updateAttrFromOldToNew(oldRule, newRule):
+    eventType = oldRule.find('IncidentDef').get('eventType')
+    for elem in newRule.iter('IncidentDef'):
+        elem.set('eventType', eventType)
+
+    IncidentTitle  = oldRule.find('IncidentTitle')
+    if IncidentTitle is not None:
+        if "on $hostName" in IncidentTitle.text:
+             for e in newRule.iter("IncidentTitle"):
+                 e.text = e.text.strip(' ') + " on $hostName"
+
+    eventType = newRule.find('IncidentTitle')
+        
+    filePath = newRule.find('SigmaFileName').text.strip(' ')
+    des = newRule.find('Description').text.strip(' ')
+    des = f"{des}. This rule is adapted from {filePath}"
+    newRule.find("Description").text = des;
+    dataSrc = oldRule.find('DataSource')
+   
+    origNewRule = newRule;
+    newRule = oldRule;
+
+    for newElem in origNewRule.iter():
+        for e in newRule.iter(newElem.tag):
+            if newElem.text is not None:
+                e.text = newElem.text
+            if newElem.attrib is None:
+                continue
+
+            for name, value in newElem.attrib.items():
+                elem.set(name, value)
+    return newRule
+

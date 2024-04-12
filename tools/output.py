@@ -28,7 +28,7 @@ def outputStatuRules(rulesDicts, outFile, status):
     print("<Rules>", file=out)
     for item in rulesDicts["ruleName"].values():
         if status is None:
-           if item[1] != RULE_STATUS.DELETE:
+           if item[1] != RULE_STATUS.NEW:
               outputRule = item[0]
               if item[1] in (RULE_STATUS.NEW, RULE_STATUS.MODIFIED):
                   if item[2].find("ErrMsg") is not None:

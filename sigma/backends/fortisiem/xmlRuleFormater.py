@@ -94,8 +94,12 @@ class FortisiemXMLRuleFormater:
         for elem in self.ruleRoot.iter(paraElem):
             ET.SubElement(elem, chileElemName)
 
-    def formatGroupName(self, groupname):
-        return groupname
+    def formatGroupName(self, groupname, product):
+        if product is None:
+            return groupname
+        
+        finialProduct = product.upper()
+        return f"{groupname}_{finialProduct}"
 
     def getRuleId(self):
         return self.ruleId;
@@ -122,8 +126,8 @@ class FortisiemXMLRuleFormater:
            technique_str = technique_str[1:]
         return sub_function_str, technique_str
 
-    def generateRuleHeader(self, sigma_ruleTags):
-        rulename = self.formatGroupName("PH_SYS_RULE_THREAT_HUNTING")
+    def generateRuleHeader(self, sigma_ruleTags, product):
+        rulename = self.formatGroupName("PH_SYS_RULE_THREAT_HUNTING", product)
         tags = set()
         for item in sigma_ruleTags:
             tags.add(item.name)
@@ -251,7 +255,7 @@ class FortisiemXMLRuleFormater:
         if len(displayAttrs) == 0:
             fields = "phRecvTime,rawEventMsg"
         else:
-            fields = "phRecvTime," +  ",".join(displayAttrs) + ",rawEventMsg" 
+            fields = "phRecvTime,hostName," +  ",".join(displayAttrs) + ",rawEventMsg" 
 
         ET.SubElement(self.ruleRoot, "TriggerEventDisplay")
         self.addAnElem("TriggerEventDisplay", "AttrList")
@@ -325,7 +329,7 @@ class FortisiemXMLRuleFormater:
         displayAttr = self.getDisplayAttr(displayAttr)
         incidentDefAttr = self.getIncidentDefAttr(incidentDefAttr)
 
-        self.generateRuleHeader(tags)
+        self.generateRuleHeader(tags, product)
         self.generateRuleCommonPart(name, des, status, product)
         self.generateRuleIncidentDef(name, level, incidentDefAttr)
         self.generateRulePatternClause(conditionStr, groupByAttr)

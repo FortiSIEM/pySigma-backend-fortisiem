@@ -1,26 +1,30 @@
-- cd pySigma-backend-fortisiem/
+- cd pySigma-backend-fortisiem/i
 
-- ./tools/fortisiem_sigma_tool.py -o out/rule.xml -f YML_file_full_path
+###### Generate New rules file.
+- ./tools/fortisiem_sigma_tool.py -o NewRules.xml -f YML_file_full_path
    Generate rule.xml from YML_file_full_path
 
-- ./tools/fortisiem_sigma_tool.py -o out/rule.xml -i rules/linux
-  Generate rule.xml from yml files in rules/linux by FortisemBackend
+- ./tools/fortisiem_sigma_tool.py -o NewRules.xml -i rules/linux
+  Generate rule.xml from yml files in rules/linux 
 
-- ./tools/fortisiem_sigma_tool.py -t windows -c windows_sysmon -o out/rule.xml -i rules/windows
-- ./tools/fortisiem_sigma_tool.py -t windows -o out/rule.xml -i rules/windows
-  Generate rule.xml from yml files in rules/windows by WindowsBackend
+- ./tools/fortisiem_sigma_tool.py -o NewRules.xml -i rules/windows
+  Generate rule.xml from yml files in rules/windows 
 
-- ./tools/fortisiem_sigma_tool.py  -t windows -c windows_sysmon -o out/rule.xml -i list_YML_file_name.csv
+- ./tools/fortisiem_sigma_tool.py  -o NewRules.xml -i list_YML_file_name.csv
   Generate rule.xml from yml files listed in list_YML_file_name.csv
 
-- ./tools/fortisiem_sigma_tool.py -t windows -c windows_sysmon -o out/rule.xml -i rules/windows  --ruleFile ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
-  According to yml files in rules/windows to update ruleFile
+###### Update old rule file.
+- ./tools/fortisiem_sigma_tool.py -o NewRules.xml -i rules/windows --ruleFile OrigRules.xml
+  According to yml files in rules/windows to update OrigRules.xml. 
+  Only update rules, not add/delete rules in outFile
 
-- ./tools/fortisiem_sigma_tool.py  -t windows -c windows_sysmon -o out/rule.xml -i list_YML_file_name.csv --ruleFile ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
-  According to yml files listed in list_YML_file_name.csv to update ruleFile 
+- ./tools/fortisiem_sigma_tool.py -o NewRules.xml -i list_YML_file_name.csv --ruleFile OrigRules.xml
+  According to yml files listed in list_YML_file_name.csv to update ruleFile. 
+  Only update rules, not add/delete rules in outFile
 
-- ./tools/fortisiem_sigma_tool.py -t windows -c windows_sysmon -o out -i rules/windows --ruleFile ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
-     1. This command will compare THREAT_HUNTING_RULES_WIN_SIGMA_1.xml and rules generated from yml in rules/windows
+###### Generate new rulus and compare with old rule file.
+- ./tools/fortisiem_sigma_tool.py  -o out -i rules/windows --ruleFile OrigRules.xml
+     1. This command will compare OrigRules.xml and rules generated from yml in rules/windows
      2. It will generate four rule file:
           out/SIGMA_no_change.xml
           out/SIGMA_modified.xml
@@ -28,13 +32,8 @@
           out/SIGMA_deleted.xml
           out/SIGMA_error.xml
 
-- ./tools/fortisiem_sigma_tool.py -t windows -c windows_sysmon -o out/SIGMA_rule.xml  -i rules/windows  --ruleFile ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
-     1. This command will compare THREAT_HUNTING_RULES_WIN_SIGMA_1.xml and rules generated from yml in rules/windows
-     2. It will generate a rule file:
-        out/SIGMA_rule.xml:  Output all rules expect the deleted rule. The rules are in order as it in THREAT_HUNTING_RULES_WIN_SIGMA_1.xml
-        out/SIGMA_error.xml: Output all error rules
-
-- ./tools/fortisiem_sigma_tool.py  --ruleToCsv -o rules.csv --i  ../../data-definition/rules/THREAT_HUNTING_RULES_WIN_SIGMA_1.xml 
+###### To collect information from rule file
+- ./tools/fortisiem_sigma_tool.py  --ruleToCsv -o rules.csv --i  OrigRules.xml 
   Generate CSV file from a rule file
 
 - ./tools/fortisiem_sigma_tool.py  --ruleToCsv -o allRules.csv --i  ../../data-definition/rules/ 
@@ -48,3 +47,24 @@
 
 ./tools/fortisiem_sigma_tool.py --diff -o out/deletedFile.csv --ruleFile oldRuleFile.xml  -i newRuleFile.xml
  Find the deleted rules in newRuleFile.xml from oldRuleFile.xml
+
+###### getYmlStatusInSigmaRepo.sh
+   This script is to get the yml file status in sigma repo
+
+   Example: 
+    1. to get the changes of yml files under sigma
+       getYmlStatusInSigmaRepo.sh sigma "7f3eff58e17c1edec877cf45972726588d009940" "9078b857a186f19cd9b1c7f939df989b0bb5ca4b" changes.csv 
+    2. to get the changes of yml files under sigma/rules
+       getYmlStatusInSigmaRepo.sh sigma "7f3eff58e17c1edec877cf45972726588d009940" "9078b857a186f19cd9b1c7f939df989b0bb5ca4b" changes.csv rules 
+
+##### Steps to update local rule file from https://github.com/Neo23x0/sigma.
+    1. You have to know your local file is generated from which commit in sigma Repo
+    2. Use getYmlStatusInSigmaRepo.sh to get the changes.csv
+    3. Find all the renamed recode and save it in tools/config/RenameFileName.csv
+       Record format: FULLPATH,oldFileName,newFileName.
+       The file name is only contain the filename, not path
+       for example.
+           FULLPATH,proc_creation_macos_add_to_admin_group.yml,proc_creation_macos_add_to_admin_group.yml
+    4. Use command to update old rule file.
+        
+
