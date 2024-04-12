@@ -15,7 +15,8 @@ from sigma.types import (
     SigmaString,
     SigmaRegularExpression,
     SpecialChars,
-    SigmaCIDRExpression
+    SigmaCIDRExpression,
+    SigmaNumber
 )
 
 class FortisemBackend(TextQueryBackend):
@@ -268,6 +269,14 @@ class FortisemBackend(TextQueryBackend):
                 return regex_value
 
 
+    def convert_condition_val(self, cond: ConditionValueExpression, state: ConversionState) -> Any:
+        value =  super().convert_condition_val(cond, state)
+        converted = self.contain_expression1.format(
+                    field = self.escape_and_quote_field(self.default_field_name),
+                    value = value)
+        return converted
+
+
     def convert_condition_field_eq_val_re(self, cond : ConditionFieldEqualsValueExpression, state : "sigma.conversion.state.ConversionState"):
         if not isinstance(cond.value, SigmaRegularExpression):
             error = "ERROR:  It's not SigmaRegularExpression when convert_condition_field_eq_val_re" 
@@ -360,7 +369,7 @@ class FortisemBackend(TextQueryBackend):
                if arg is None:
                    continue
                if isinstance(arg, ConditionValueExpression):
-                    if isinstance(arg.value, SigmaString):
+                    if isinstance(arg.value, SigmaString) or isinstance(arg.value, SigmaNumber):
                        val = str(arg.value).replace('"', "\\\"");
                        converted = self.contain_expression.format(
                             field = self.escape_and_quote_field(self.default_field_name),
@@ -406,7 +415,7 @@ class FortisemBackend(TextQueryBackend):
                if arg is None:
                     continue
                elif isinstance(arg, ConditionValueExpression):
-                    if isinstance(arg.value, SigmaString):
+                    if isinstance(arg.value, SigmaString) or isinstance(arg.value, SigmaNumber):
                        val = str(arg.value).replace('"', "\\\"");
                        converted = self.contain_expression.format(
                             field = self.escape_and_quote_field(self.default_field_name),

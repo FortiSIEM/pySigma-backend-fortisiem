@@ -136,8 +136,8 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
                 else: 
                     newRuleCondition = newRuleCondition + " " + token + " " + subRuleCondition 
            else:
-                x = re.split(" (?:AND|OR) ", remainStr)
-                subRuleCondition = self.getAttOpVal(x[0], partConditionIsNot)
+                oneCond, remainStr= self.getFilter(remainStr)
+                subRuleCondition = self.getAttOpVal(oneCond, partConditionIsNot)
                 if subRuleCondition is None:
                     break
 
@@ -146,16 +146,38 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
                 else:
                     newRuleCondition = newRuleCondition + " " + token + " " + subRuleCondition
 
-                if len(x) == 1:
-                    remainStr = ""
-                else:
-                    remainStr = remainStr[len(x[0]):].strip(" ")
-
 
         if newRuleCondition is None:
             return None
         else:
             return newRuleCondition.strip(" ")
+
+    def getFilter(self, conditionStr):
+       x = re.split(" (?:AND|OR) ", conditionStr)
+       if len(x) == 1:
+           return conditionStr, ""
+
+       nextIndex = 0;
+       inQuoteStr = False
+       while(nextIndex < len(conditionStr)):
+            if inQuoteStr:
+                if conditionStr[nextIndex]== '\\':
+                   nextIndex = nextIndex + 2
+                   continue
+                elif conditionStr[nextIndex]== '"':
+                    inQuoteStr = False
+                nextIndex = nextIndex +1
+            else:
+                if conditionStr[nextIndex]== '"':
+                    inQuoteStr = True
+                    nextIndex = nextIndex + 1
+                    continue
+                if conditionStr[nextIndex:].startswith(" AND ") or conditionStr[nextIndex:].startswith(" OR "):
+                    return conditionStr[0: nextIndex], conditionStr[nextIndex:].strip(' ')
+
+                nextIndex = nextIndex + 1
+       return conditionStr, "";
+
 
     def getAttOpVal(self, conditionOrg, isNot):
         newCondition = conditionOrg

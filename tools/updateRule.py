@@ -235,7 +235,7 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
 
              else: # filterstr1 != filterstr2 or groupbystr1 != groupbystr2:
                  #print("%s\n%s\n%s\n%s" % (filterstr1,filterstr2,groupbystr1,groupbystr2))
-                 print("Modified Rule %s" % filePath)
+                 #print("Modified Rule %s" % filePath)
                  finialNewRule = updateAttrFromOldToNew(oldRule, newRule) 
                  addUpdatedStatus(finialNewRule, RULE_STATUS.MODIFIED)
                  rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.MODIFIED, finialNewRule)

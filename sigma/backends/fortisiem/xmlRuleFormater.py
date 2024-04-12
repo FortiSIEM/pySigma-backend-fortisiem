@@ -302,7 +302,7 @@ class FortisiemXMLRuleFormater:
 
         product = None
         logsource = sigma_rule.logsource
-        if logsource is not None:
+        if logsource is not None and logsource.product is not None:
             product = logsource.product.strip(" ").lower()
 
         date = sigma_rule.date
