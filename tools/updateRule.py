@@ -1,5 +1,6 @@
 from enum import Enum
 import csv
+import re
 import xml.etree.ElementTree as ET
 from lxml import etree
 
@@ -128,29 +129,6 @@ def shouldUpdated(oldRule):
     else:
        return True
 
-def diffRules(newRule, oldRule):
-    errNode = newRule.find("ErrMsg")
-    if errNode is not None:
-        return True
-
-    groupBy1 = oldRule.find("./PatternClause/SubPattern/GroupByAttr");
-    groupbystr1 = "";
-    if groupBy1 is not None:
-       groupbystr1 = ",".join(sorted(groupBy1.text.replace(" ", "").split(",")))
-
-    ruleconstr1 = oldRule.find("./PatternClause/SubPattern/SingleEvtConstr").text.replace(" ", "")
-
-    groupBy2 = newRule.find("./PatternClause/SubPattern/GroupByAttr");
-    groupbystr2=""
-    if groupBy2 is not None:
-       groupbystr2 = ",".join(sorted(groupBy2.text.replace(" ", "").split(",")))
-
-    ruleconstr2 = newRule.find("./PatternClause/SubPattern/SingleEvtConstr").text.replace(" ", "")
-
-    if ruleconstr1 == ruleconstr2 and groupbystr1 == groupbystr2:
-        return False
-    return True
-
 def addUpdatedStatus(rule, status):
     node = rule.find("SIGMAUpdateStatus")
     if node is None:
@@ -213,7 +191,7 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
              filePath1 = newRule.find('SigmaFileName').text.strip(' ')
              for elem in newRule.iter('SigmaFileName'):
                  elem.text = f"https://github.com/SigmaHQ/sigma/blob/master/{filePath1}"
-
+                 
              if not diffRules(newRule, oldRule):
                  #print("No Change Rule %s" % filePath)
                  #SIGMAStatus = newRule.find('SIGMAStatus')
@@ -279,3 +257,145 @@ def updateAttrFromOldToNew(oldRule, newRule):
                 elem.set(name, value)
     return newRule
 
+def getQuoteStr(conditionStr):
+        nextIndex = 1;
+        while(nextIndex < len(conditionStr)):
+            if conditionStr[nextIndex]== '\\':
+                nextIndex = nextIndex + 2
+            elif conditionStr[nextIndex]== '"':
+                return nextIndex
+            else:
+                nextIndex = nextIndex + 1
+        error = "Doubel quote doesn't match."
+        raise NotImplementedError(error)
+
+def getFilter(conditionStr):
+       x = re.split(" (?:AND|OR) ", conditionStr)
+       if len(x) == 1:
+           return conditionStr, ""
+
+       nextIndex = 0;
+       inQuoteStr = False
+       while(nextIndex < len(conditionStr)):
+            if conditionStr[nextIndex]== '"':
+                nextQuoteIndex = getQuoteStr(conditionStr[nextIndex:])
+                if not nextQuoteIndex:
+                    print(f"Quote doesn't match in {conditionStr}")
+                    return remainStr, None
+                nextIndex = nextIndex + nextQuoteIndex
+            else:
+                if conditionStr[nextIndex:].startswith(" AND ") or conditionStr[nextIndex:].startswith(" OR "):
+                    return conditionStr[0: nextIndex], conditionStr[nextIndex:].strip(" ")
+
+            nextIndex = nextIndex + 1
+       return conditionStr, "";
+
+def getParenthesesExpression(conditionStr):
+        count = 1;
+        nextIndex = 1;
+        remainStr = "";
+        currDict = ()
+        while(nextIndex < len(conditionStr)):
+            if conditionStr[nextIndex]== '"':
+                nextQuoteIndex = getQuoteStr(conditionStr[nextIndex:])
+                if not nextQuoteIndex:
+                    return remainStr, None
+                nextIndex = nextIndex + nextQuoteIndex
+            elif conditionStr[nextIndex]== '(':
+                count = count + 1
+            elif conditionStr[nextIndex]== ')':
+                count = count - 1;
+                if count == 0:
+                    remainStr = conditionStr[ nextIndex + 1:]
+                    currDict = generateDictFromExpression(conditionStr[1:nextIndex])
+                    break
+
+            nextIndex = nextIndex + 1
+
+        if count > 0:
+            error = "Parentheses doesn't match."
+            raise NotImplementedError(error)
+
+        return currDict, remainStr.strip(" ")
+
+
+def formatExpression(currDict, token):
+    strList = [] 
+    for item in currDict[1]:
+        if isinstance(item, tuple):
+            tmp = formatExpression(item, currDict[0])
+            if tmp is None:
+               continue
+            strList.append(tmp)
+        else:
+            strList.append(item)
+
+    if len(strList) == 0:
+        return None
+    elif len(strList) == 1:
+        return strList[0]
+    else:
+        strList = sorted(strList)
+        filters = currDict[0].join(strList)
+        if token == currDict[0]:
+            return filters
+        else:
+            return "( %s )" % filters
+    
+
+def generateDictFromExpression(conditionStr):
+        remainStr = str(conditionStr).strip(" ");
+        currDict = ()
+        currFilterList = []
+        token = ""
+        while remainStr != "":
+            if remainStr[0] == '(':
+                subFilterDict, remainStr = getParenthesesExpression(remainStr)
+                if subFilterDict is None:
+                    continue;
+                if len(subFilterDict[1]) == 0:
+                    continue;
+                elif len(subFilterDict[1]) == 1:
+                    currFilterList.append(subFilterDict[1][0])
+                    continue;
+                else:
+                    currFilterList.append(subFilterDict)
+            else: 
+                oneCond, remainStr = getFilter(remainStr)
+                part = re.split("( = | CONTAIN | REGEXP | IN | IS )", oneCond)
+                attr = part[0].strip(" ")
+
+                oneCond = oneCond[len(part[0]):].strip(" ")
+                index = oneCond.find(" ")
+                op = oneCond[0 : index].strip(" ")
+
+                val = oneCond[index:].strip(" ")
+                oneCond = f"{attr} {op} {val}"
+                currFilterList.append(oneCond.strip(" "))
+
+            remainStr.strip(" ")
+            if remainStr.startswith("AND "):
+                token = " AND "
+                remainStr = remainStr[4:]
+            elif remainStr.startswith("OR "):
+                token = " OR "
+                remainStr = remainStr[3:]
+            remainStr = remainStr.strip(" ")
+
+        if len(currFilterList) == 0:
+            return None
+        return (token, currFilterList)
+
+
+def diffRules(newRule, oldRule):
+    errNode = newRule.find("ErrMsg")
+    if errNode is not None:
+        return True
+    ruleConstr1 = oldRule.find("./PatternClause/SubPattern/SingleEvtConstr").text
+    oldDict = generateDictFromExpression(ruleConstr1)
+    oldConstr = formatExpression(oldDict, "");
+
+    ruleConstr2 = newRule.find("./PatternClause/SubPattern/SingleEvtConstr").text
+    newDict = generateDictFromExpression(ruleConstr2)
+    newConstr = formatExpression(newDict, "");
+    return newConstr.replace(" ", "") != oldConstr.replace(" ", "")
