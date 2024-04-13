@@ -189,6 +189,7 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
              newRule.set('id', ruleId)
              
              filePath1 = newRule.find('SigmaFileName').text.strip(' ')
+
              for elem in newRule.iter('SigmaFileName'):
                  elem.text = f"https://github.com/SigmaHQ/sigma/blob/master/{filePath1}"
                  
@@ -318,36 +319,37 @@ def getParenthesesExpression(conditionStr):
 
         return currDict, remainStr.strip(" ")
 
+def compareDict(oldDict, newDict):
+    if oldDict[0] != newDict[0]:
+        return False
 
-def formatExpression(currDict, token):
-    strList = [] 
-    for item in currDict[1]:
-        if isinstance(item, tuple):
-            tmp = formatExpression(item, currDict[0])
-            if tmp is None:
-               continue
-            strList.append(tmp)
-        else:
-            strList.append(item)
-
-    if len(strList) == 0:
-        return None
-    elif len(strList) == 1:
-        return strList[0]
-    else:
-        strList = sorted(strList)
-        filters = currDict[0].join(strList)
-        if token == currDict[0]:
-            return filters
-        else:
-            return "( %s )" % filters
+    if len(oldDict[1]) !=  len(newDict[1]):
+        return False
     
+    eqCount = 0; 
+    for oldItem in oldDict[1]:
+        if isinstance(oldItem, str):
+            for newItem in newDict[1]:
+                if isinstance(newItem, str):
+                    if oldItem.replace(" ", "") == newItem.replace(" ", ""):
+                        eqCount = eqCount + 1
+                        break
+        else:
+            for newItem in newDict[1]:
+                if isinstance(newItem, tuple):
+                    if compareDict(oldItem, newItem):
+                        eqCount = eqCount + 1
+                        break
+
+    return eqCount == len(newDict[1])
 
 def generateDictFromExpression(conditionStr):
         remainStr = str(conditionStr).strip(" ");
         currDict = ()
         currFilterList = []
         token = ""
+
+        subFilterList = []
         while remainStr != "":
             if remainStr[0] == '(':
                 subFilterDict, remainStr = getParenthesesExpression(remainStr)
@@ -359,31 +361,42 @@ def generateDictFromExpression(conditionStr):
                     currFilterList.append(subFilterDict[1][0])
                     continue;
                 else:
-                    currFilterList.append(subFilterDict)
-            else: 
-                oneCond, remainStr = getFilter(remainStr)
-                part = re.split("( = | CONTAIN | REGEXP | IN | IS )", oneCond)
-                attr = part[0].strip(" ")
-
-                oneCond = oneCond[len(part[0]):].strip(" ")
-                index = oneCond.find(" ")
-                op = oneCond[0 : index].strip(" ")
-
-                val = oneCond[index:].strip(" ")
-                oneCond = f"{attr} {op} {val}"
-                currFilterList.append(oneCond.strip(" "))
-
-            remainStr.strip(" ")
-            if remainStr.startswith("AND "):
+                    subFilterList.append(subFilterDict)
+            elif remainStr.startswith("AND "):
                 token = " AND "
                 remainStr = remainStr[4:]
             elif remainStr.startswith("OR "):
                 token = " OR "
                 remainStr = remainStr[3:]
+            else: 
+                oneCond, remainStr = getFilter(remainStr)
+                part = re.split("(\s*=\s*| CONTAIN | REGEXP | IN | IS | BETWEEN )", oneCond)
+                attr = part[0].strip(" ")
+
+                op = ""
+                oneCond = oneCond[len(part[0]):].strip(" ")
+                index = oneCond.find(" ")
+                if oneCond[0] == '=':
+                    op = "="
+                    index = 1
+                else:
+                    op = oneCond[0 : index].strip(" ")
+
+                val = oneCond[index:].strip(" ")
+                oneCond = f"{attr} {op} {val}"
+                currFilterList.append(oneCond.strip(" "))
+
             remainStr = remainStr.strip(" ")
 
+        for item in subFilterList:
+            if token == item[0]:
+                currFilterList = currFilterList + item[1]
+            else:
+                currFilterList.append(item)
+
         if len(currFilterList) == 0:
-            return None
+               return None
+           
         return (token, currFilterList)
 
 
@@ -393,9 +406,7 @@ def diffRules(newRule, oldRule):
         return True
     ruleConstr1 = oldRule.find("./PatternClause/SubPattern/SingleEvtConstr").text
     oldDict = generateDictFromExpression(ruleConstr1)
-    oldConstr = formatExpression(oldDict, "");
 
     ruleConstr2 = newRule.find("./PatternClause/SubPattern/SingleEvtConstr").text
     newDict = generateDictFromExpression(ruleConstr2)
-    newConstr = formatExpression(newDict, "");
-    return newConstr.replace(" ", "") != oldConstr.replace(" ", "")
+    return not compareDict(oldDict, newDict)
