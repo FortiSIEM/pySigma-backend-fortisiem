@@ -17,7 +17,7 @@ from sigma.backends.fortisiem.xmlRuleFormater import FortisiemXMLRuleFormater
 sigma_path = os.getcwd()
 sys.path.insert(0, sigma_path)
 from tools.output import outputStatuRules,outputRules
-from tools.updateRule import addNewRule, loadRulesXML, RULE_STATUS
+from tools.updateRule import addNewRule, loadRulesXML, updateLinkOnly, RULE_STATUS
 import codecs
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
@@ -34,6 +34,7 @@ def set_argparser():
     argparser.add_argument("--ruleToCsv",action='store_true', help="Generate Csv file from rule files.")
     argparser.add_argument("--reportToCsv",action='store_true', help="Generate Csv file from report file.")
     argparser.add_argument("--diff",action='store_true', help="Get deleted rules between two rule files")
+    argparser.add_argument("--onlyUpdateLink",action='store_true', help="Update link in old rules")
     #If forGui is False, the xml format can be imported into FortiSIEM by backend command
     argparser.add_argument("--forGui",action='store_true', help="The XML format can be imported into FortiSIEM by GUI")
     return argparser
@@ -166,6 +167,15 @@ def main():
     rulesDicts = {}
     noEvtTyRule = []
     ruleIndex = int(cmdargs.ruleStartIndex)
+
+
+    if cmdargs.onlyUpdateLink:
+        if cmdargs.ruleFile is None:
+            print("--ruleFile can't be empty. It's a rule file which needs to be updated.")
+            sys.exit(-1)
+        rulesDicts = updateLinkOnly(cmdargs.ruleFile, sigmaFileList);
+        outputRules(rulesDicts, outFile);
+        sys.exit(0)
 
     rulesDicts, maxRuleIndex = loadRulesXML(cmdargs.ruleFile, sigmaFileList)
     if ruleIndex < maxRuleIndex:

@@ -25,6 +25,52 @@ def statusToStr(status):
     else:
         return status.name
 
+def updateLinkOnly(RuleFile, ymlFileList):
+    ymlfileNames = {} #filePath---> fileName
+    for ymlfilePath in ymlFileList:
+        tmp = ymlfilePath.split("/")[-1]
+        ymlfileNames[tmp.lower()] = ymlfilePath
+
+    rulesDicts = {}
+    rulesDicts["ruleName"] = {}
+
+    renameFileMap = loadRenameFileMap()
+    tree = ET.parse(RuleFile)
+    root = tree.getroot()
+    
+    countDel = 0;
+    countChange = 0;
+    countNoChange = 0;
+    for rule in root.findall('Rule'):
+        ruleName = ruleName = rule.find('Name').text.strip(' ')
+        addUpdatedStatus(rule, RULE_STATUS.NOCHANGE)
+        filePath = rule.find('SigmaFileName')
+        if filePath is None:
+            rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.NOCHANGE);
+            countNoChange = countNoChange + 1
+            continue
+        filePath = filePath.text.replace("https://github.com/SigmaHQ/sigma/blob/master/", "").strip(' ')
+        newfilePath = filePath
+        newfilePath = convertOldPath2NewPath(renameFileMap, filePath, ymlfileNames)
+        if newfilePath in ymlFileList:
+            if filePath == newfilePath:
+                addUpdatedStatus(rule, RULE_STATUS.NOCHANGE)
+                rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.NOCHANGE);
+                countNoChange = countNoChange + 1
+            else:
+                countChange = countChange + 1
+                updateFileNameInRule(rule, newfilePath)
+                addUpdatedStatus(rule, RULE_STATUS.ONLYLINK)
+                rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.ONLYLINK);
+        else:
+            countDel = countDel + 1
+            addUpdatedStatus(rule, RULE_STATUS.DELETE)
+            rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.DELETE);
+    print(f"No Change {countNoChange}")
+    print(f"Only link Change {countChange}")
+    print(f"Delete {countDel}")
+    return rulesDicts
+
 def loadRulesXML(RuleFile, ymlFileList):
     ymlfileNames = {} #filePath---> fileName
     for ymlfilePath in ymlFileList:
@@ -50,32 +96,33 @@ def loadRulesXML(RuleFile, ymlFileList):
         index = int(rule.get("id").split("_")[-1].strip(' '))
         if index > maxRuleIndex:
             maxRuleIndex = index
-        addUpdatedStatus(rule, RULE_STATUS.NOCHANGE)
-        rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.DELETE);
+        addUpdatedStatus(rule, RULE_STATUS.DELETE)
 
         filePath = rule.find('SigmaFileName').text.strip(' ')
         newfilePath = filePath
         newfilePath = convertOldPath2NewPath(renameFileMap, filePath, ymlfileNames)
-        #if filePath != newfilePath:
-        #   print("%s,%s" % (filePath, newfilePath))
+
         newname = newfilePath.split("/")[-1]
         rulesDicts["filePath"][newname.lower()] = ruleName;
-
-        '''
-        des = rule.find('Description').text.strip(' ').lower()
-        index = des.find(" this rule is adapted from https")
-        if index != -1:
-           des = des[0:index]
-           rulesDicts["ruleDes"][des] = ruleName;
-        '''
-
+        rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.DELETE);
     return rulesDicts,maxRuleIndex
+
+def updateFileNameInRule(rule, newFilePath):
+     for e in rule.iter("SigmaFileName"):
+        e.text = f"https://github.com/SigmaHQ/sigma/blob/master/{newFilePath}"
+
+     for e in rule.iter("Description"):
+         index = e.text.lower().find(" this rule is adapted from https")
+         des = e.text
+         index = des.lower().find(" this rule is adapted from https")
+         if index != -1:
+             des = des[0:index]
+         e.text = f"{des}. This rule is adapted from  https://github.com/SigmaHQ/sigma/blob/master/{newFilePath}"
+
 
 def loadRenameFileMap():
     fileName = "./tools/config/RenameFileName.csv"
     RenameFileMap = {}
-
-    return RenameFileMap
 
     with open(fileName, newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',')
@@ -188,39 +235,30 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
              ruleId = oldRule.get('id');
              newRule.set('id', ruleId)
              
-             filePath1 = newRule.find('SigmaFileName').text.strip(' ')
-
-             for elem in newRule.iter('SigmaFileName'):
-                 elem.text = f"https://github.com/SigmaHQ/sigma/blob/master/{filePath1}"
+             oldFilePath = oldRule.find('SigmaFileName').text.strip(' ')
+             newFilePath = newRule.find('SigmaFileName').text.strip(' ')
+            
+             updateFileNameInRule(oldRule, newFilePath)
+             updateFileNameInRule(newRule, newFilePath)
                  
              if not diffRules(newRule, oldRule):
-                 #print("No Change Rule %s" % filePath)
-                 #SIGMAStatus = newRule.find('SIGMAStatus')
-                 #if SIGMAStatus is not None:
-                    # addSigmaStatus(oldRule, SIGMAStatus.text.strip(' '))
-
-                 addUpdatedStatus(newRule, RULE_STATUS.NOCHANGE)
-                 filePath = oldRule.find('SigmaFileName').text.strip(' ')
-                 filePath1 = newRule.find('SigmaFileName').text.strip(' ')
-                 if filePath1 not in filePath:
-                     for elem in oldRule.iter('SigmaFileName'):
-                         elem.text = filePath1 
-                     des = newRule.find('Description').text.strip(' ')
-                     for elem in oldRule.iter('Description'):
-                         elem.text = des
+                 if newFilePath not in oldFilePath:
+                     addUpdatedStatus(newRule, RULE_STATUS.ONLYLINK)
                      rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.ONLYLINK)
                  else:
+                     addUpdatedStatus(newRule, RULE_STATUS.NOCHANGE)
                      rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.NOCHANGE)
 
              else: # filterstr1 != filterstr2 or groupbystr1 != groupbystr2:
-                 #print("%s\n%s\n%s\n%s" % (filterstr1,filterstr2,groupbystr1,groupbystr2))
-                 #print("Modified Rule %s" % filePath)
                  finialNewRule = updateAttrFromOldToNew(oldRule, newRule) 
                  addUpdatedStatus(finialNewRule, RULE_STATUS.MODIFIED)
                  rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.MODIFIED, finialNewRule)
         else:
             ruleIndex = ruleIndex + 1
-            #print("New Rule %s" % filePath)
+
+            newFilePath = newRule.find('SigmaFileName').text.strip(' ')
+            updateFileNameInRule(newRule, newFilePath)
+
             addUpdatedStatus(newRule, RULE_STATUS.NEW)
             rulesDicts["ruleName"][ruleName] = (None, RULE_STATUS.NEW, newRule)
         return ruleIndex
@@ -236,14 +274,6 @@ def updateAttrFromOldToNew(oldRule, newRule):
              for e in newRule.iter("IncidentTitle"):
                  e.text = e.text.strip(' ') + " on $hostName"
 
-    eventType = newRule.find('IncidentTitle')
-        
-    filePath = newRule.find('SigmaFileName').text.strip(' ')
-    des = newRule.find('Description').text.strip(' ')
-    des = f"{des}. This rule is adapted from {filePath}"
-    newRule.find("Description").text = des;
-    dataSrc = oldRule.find('DataSource')
-   
     origNewRule = newRule;
     newRule = oldRule;
 

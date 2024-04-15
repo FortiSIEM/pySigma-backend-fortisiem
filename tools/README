@@ -22,6 +22,10 @@
   According to yml files listed in list_YML_file_name.csv to update ruleFile. 
   Only update rules, not add/delete rules in outFile
 
+######Only update the file link in OrigRules.xml 
+ According to yml files listed in rules/windows/ to update file link in OrigRules.xml
+./tools/fortisiem_sigma_tool.py -o out/test.xml -i  rules/windows/ --onlyUpdateLink --ruleFile OrigRules.xml
+
 ###### Generate new rulus and compare with old rule file.
 - ./tools/fortisiem_sigma_tool.py  -o out -i rules/windows --ruleFile OrigRules.xml
      1. This command will compare OrigRules.xml and rules generated from yml in rules/windows
@@ -60,7 +64,7 @@
 ##### Steps to update local rule file from https://github.com/Neo23x0/sigma.
     1. You have to know your local file is generated from which commit in sigma Repo
     2. Use getYmlStatusInSigmaRepo.sh to get the changes.csv
-    3. Find all the renamed recode and save it in tools/config/RenameFileName.csv
+    3. Find all the renamed record and save it in tools/config/RenameFileName.csv
        Record format: FULLPATH,oldFileName,newFileName.
        The file name is only contain the filename, not path
        for example.
