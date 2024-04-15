@@ -3,6 +3,7 @@ import csv
 import re
 import xml.etree.ElementTree as ET
 from lxml import etree
+import subprocess
 
 class RULE_STATUS(Enum):
     NOCHANGE = 1,
@@ -64,8 +65,12 @@ def updateLinkOnly(RuleFile, ymlFileList):
                 rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.ONLYLINK);
         else:
             countDel = countDel + 1
-            addUpdatedStatus(rule, RULE_STATUS.DELETE)
-            rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.DELETE);
+            eventType = rule.find('IncidentDef').get('eventType')
+            cmd = f"sed -i s/{eventType}.*//g /projects/phoenix/data-definition/eventType/phoenix-eventtype.csv"
+            subprocess.run(cmd, shell=True)
+
+            #addUpdatedStatus(rule, RULE_STATUS.DELETE)
+            #rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.DELETE);
     print(f"No Change {countNoChange}")
     print(f"Only link Change {countChange}")
     print(f"Delete {countDel}")
@@ -361,7 +366,8 @@ def compareDict(oldDict, newDict):
         if isinstance(oldItem, str):
             for newItem in newDict[1]:
                 if isinstance(newItem, str):
-                    if oldItem.replace(" ", "") == newItem.replace(" ", ""):
+                    #if oldItem.replace(" ", "") == newItem.replace(" ", ""):
+                    if oldItem == newItem:
                         eqCount = eqCount + 1
                         break
         else:
@@ -372,6 +378,49 @@ def compareDict(oldDict, newDict):
                         break
 
     return eqCount == len(newDict[1])
+
+def formatAttrOpVal(oneCond):
+     part = re.split("(\s*=\s*|\s*!=\s*| CONTAIN | REGEXP | IN | IS | BETWEEN )", oneCond)
+     attr = part[0].strip(" ")
+     attr = re.sub(r"\s+NOT$", " NOT", attr)
+
+     op = ""
+     oneCond = oneCond[len(part[0]):].strip(" ")
+     index = oneCond.find(" ")
+     if oneCond[0] == '=':
+         op = "="
+         index = 1
+     elif oneCond[0:1] == '!=':
+         op = "!="
+         index = 2
+     else:
+         op = oneCond[0 : index].strip(" ")
+
+     val = oneCond[index:].strip(" ")
+     if op == "CONTAIN":
+         pass
+     elif op == "REGEXP":
+        val = val.strip("\"")
+        regex_pattern = r"(?<!\\)\|"
+        vals = re.split(regex_pattern, val)
+        modified_vals = [re.sub(r"^\.\*|\.\*$", "", val) for val in vals]
+        modified_vals = sorted(modified_vals)
+        val = "|".join(modified_vals)
+        val = f"\"{val}\""
+     elif op == "IN":
+         val = val[1:-1].strip(" ").strip("\"")
+         vals = re.split("\"\s*,\s*\"", val)
+         vals = sorted(vals)
+         val =  "\",\"".join(vals)
+         val = f"(\"{val}\")"
+     elif op == "BETWEEN":
+         regex_pattern = r"\"\s*,\s*\""
+         replacement = "\",\""
+         val = re.sub(regex_pattern, replacement, val)
+         val = re.sub(r"\(\s*", "(", val)
+         val = re.sub(r"\s*\)", ")", val)
+     oneCond = f"{attr} {op} {val}"
+     return oneCond
 
 def generateDictFromExpression(conditionStr):
         remainStr = str(conditionStr).strip(" ");
@@ -400,20 +449,7 @@ def generateDictFromExpression(conditionStr):
                 remainStr = remainStr[3:]
             else: 
                 oneCond, remainStr = getFilter(remainStr)
-                part = re.split("(\s*=\s*| CONTAIN | REGEXP | IN | IS | BETWEEN )", oneCond)
-                attr = part[0].strip(" ")
-
-                op = ""
-                oneCond = oneCond[len(part[0]):].strip(" ")
-                index = oneCond.find(" ")
-                if oneCond[0] == '=':
-                    op = "="
-                    index = 1
-                else:
-                    op = oneCond[0 : index].strip(" ")
-
-                val = oneCond[index:].strip(" ")
-                oneCond = f"{attr} {op} {val}"
+                oneCond = formatAttrOpVal(oneCond);
                 currFilterList.append(oneCond.strip(" "))
 
             remainStr = remainStr.strip(" ")
