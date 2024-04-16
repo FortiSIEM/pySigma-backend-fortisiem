@@ -47,11 +47,11 @@ class FortisiemConfig:
                 if len(row) < 2:
                     continue;
                 elif len(row) == 2:
-                    self.fortisiem_attr_type_dict[row[1]] = "string"
+                    self.fortisiem_attr_type_dict[row[1].strip(" ")] = "string"
                 else:
-                    self.fortisiem_attr_type_dict[row[1]] = row[2]
+                    self.fortisiem_attr_type_dict[row[1].strip(" ")] = row[2]
 
-                self.fortisiem_attrs_dict[row[0]] = row[1]
+                self.fortisiem_attrs_dict[row[0]] = row[1].strip(" ")
 
     def getFortiSIEMAttrType(self, attrName):
         return self.fortisiem_attr_type_dict.get(attrName, "string")

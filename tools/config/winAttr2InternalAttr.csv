@@ -98,9 +98,9 @@ TargetSid,groupID
 TemplateContent,templateContent
 NewTemplateContent,newTemplateContent
 NewTargetUserName,targetUser
-RemoteName,targetName 
+RemoteName,targetName
 LocalName,filePath
-processPath,procName 
+processPath,procName
 Action,eventAction,int
 ApplicationPath,procPath
 SearchFilter,queryFilter
