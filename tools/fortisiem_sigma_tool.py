@@ -175,7 +175,7 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
     if cmdargs.forGui:
         forGUI = True
 
-    rulesDicts = {}
+    rulesDicts = {"filePath":{}, "ruleName":{}}
     noEvtTyRule = []
     ruleIndex = int(cmdargs.ruleStartIndex)
     needHandledYmlList = []
@@ -223,6 +223,7 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
 
     for sigmaFile in needHandledYmlList:
         try:
+            print(sigmaFile)
             sigmaCollection = loadYml(sigmaFile); 
             if not sigmaCollection:
                 print("Failed to parser Sigma file %s:\n" % (sigmaFile), file=sys.stderr)
