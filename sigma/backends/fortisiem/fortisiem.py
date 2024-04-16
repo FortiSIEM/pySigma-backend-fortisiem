@@ -284,6 +284,7 @@ class FortisemBackend(TextQueryBackend):
 
         field = self.escape_and_quote_field(cond.field)
         value = cond.value.regexp 
+        value = re.sub(r'(?<!\\)"', "\\\"", value)
 
         return self.re_expression.format(field = field, 
                              value = value)
@@ -353,10 +354,12 @@ class FortisemBackend(TextQueryBackend):
     ) -> Union[str, DeferredQueryExpression]:
         """Conversion of field = number value expressions"""
         try:
-            return self.escape_and_quote_field(cond.field) + self.eq_token + str(cond.value)
+           expr = "{field}" + self.eq_token + "\"{value}\""
+           value = str(cond.value)
+           return expr.format( field = self.escape_and_quote_field(cond.field), value = value)
         except TypeError:
-            error = f"ERROR: Convert {cond.field}:{cond.value} failed in convert_condition_field_eq_val_num"
-            raise NotImplementedError(error)
+           error = f"ERROR: Convert {cond.field}:{cond.value} failed in convert_condition_field_eq_val_num"
+           raise NotImplementedError(error)
 
     def convert_condition_or(
         self, cond: ConditionOR, state: ConversionState
