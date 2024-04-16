@@ -1,4 +1,38 @@
-- cd pySigma-backend-fortisiem/i
+usage: fortisiem_sigma_tool.py [-h] [--inputs INPUTS] [--ymlFile YMLFILE]
+                               [--output OUTPUT] [--ruleFile RULEFILE]
+                               [--ruleStartIndex RULESTARTINDEX]
+                               [--action ACTION] [--forGui]
+
+Convert Sigma rules int FortiSIEM signatures.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --inputs INPUTS, -i INPUTS
+                        Used to input files
+  --ymlFile YMLFILE, -f YMLFILE
+                        Used to input one yml file
+  --output OUTPUT, -o OUTPUT
+                        It's a file used to output results
+  --ruleFile RULEFILE, -r RULEFILE
+                        It's a rule file which needs to be updated.
+  --ruleStartIndex RULESTARTINDEX, -s RULESTARTINDEX
+                        Options Rule start id.
+  --action ACTION, -a ACTION
+                        
+                        How to deal with the YAML file.
+                            New: Only output the new rules which aren't in the '--ruleFile' file. 
+                            Update: Update the '--ruleFile' file. It only updates rules when the rule is found in '--inputs'.
+                            OnlyUpdateLink: Only update the file link in rules in the '--ruleFile' file.
+                            FullUpdate: Update all rules in the '--ruleFile' file. Delete, update and add rules in '--ruleFile'
+                            Diff: Get deleted rules between two rule files.
+                            ReportToCsv: Generate CSV file from report file.
+                            RuleToCsv: Generate CSV file from rule files.
+  --forGui              The XML format can be imported into FortiSIEM by GUI
+
+
+
+
+- Goto pySigma-backend-fortisiem/
 
 ###### Generate New rules file.
 - ./tools/fortisiem_sigma_tool.py -o NewRules.xml -f YML_file_full_path
@@ -13,29 +47,24 @@
 - ./tools/fortisiem_sigma_tool.py  -o NewRules.xml -i list_YML_file_name.csv
   Generate rule.xml from yml files listed in list_YML_file_name.csv
 
-###### Update old rule file.
-- ./tools/fortisiem_sigma_tool.py -o NewRules.xml -i rules/windows --ruleFile OrigRules.xml
+###### update the old rule file.
+- ./tools/fortisiem_sigma_tool.py -a New -o out/test.xml -i rules/windows --ruleFile OrigRules.xml
+   According to yml files in rules/windows to update OrigRules.xml.
+   Update all rules. Deleted rules, Add rules, Update rules.
+
+###### Only update the modified rules
+- ./tools/fortisiem_sigma_tool.py -a Update -o NewRules.xml -i rules/windows --ruleFile OrigRules.xml
   According to yml files in rules/windows to update OrigRules.xml. 
-  Only update rules, not add/delete rules in outFile
+  Only update rules which can be found in rules/windows 
 
-- ./tools/fortisiem_sigma_tool.py -o NewRules.xml -i list_YML_file_name.csv --ruleFile OrigRules.xml
-  According to yml files listed in list_YML_file_name.csv to update ruleFile. 
-  Only update rules, not add/delete rules in outFile
+###### Only update the file link in OrigRules.xml 
+- ./tools/fortisiem_sigma_tool.py -a OnlyUpdateLink -o out/test.xml -i  rules/windows/ --ruleFile OrigRules.xml
+  According to yml files listed in rules/windows/ to update file link in OrigRules.xml
 
-######Only update the file link in OrigRules.xml 
- According to yml files listed in rules/windows/ to update file link in OrigRules.xml
-./tools/fortisiem_sigma_tool.py -o out/test.xml -i  rules/windows/ --onlyUpdateLink --ruleFile OrigRules.xml
+###### Only output new rules which are not in old rule file.
+- ./tools/fortisiem_sigma_tool.py -a New -o out/test.xml -i rules/windows --ruleFile OrigRules.xml
 
-###### Generate new rulus and compare with old rule file.
-- ./tools/fortisiem_sigma_tool.py  -o out -i rules/windows --ruleFile OrigRules.xml
-     1. This command will compare OrigRules.xml and rules generated from yml in rules/windows
-     2. It will generate four rule file:
-          out/SIGMA_no_change.xml
-          out/SIGMA_modified.xml
-          out/SIGMA_new.xml
-          out/SIGMA_deleted.xml
-          out/SIGMA_error.xml
-
+  
 ###### To collect information from rule file
 - ./tools/fortisiem_sigma_tool.py  --ruleToCsv -o rules.csv --i  OrigRules.xml 
   Generate CSV file from a rule file

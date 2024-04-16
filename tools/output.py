@@ -14,96 +14,63 @@ def prettyXML(elem):
      content = etree.tostring(root, pretty_print = True, encoding = str)
      return content
 
-def outputStatuRules(rulesDicts, outFile, status):
+
+def statusToStr(status):
+    if status == RULE_STATUS.NOCHANGE:
+        return  "No Change"
+    elif  status == RULE_STATUS.ONLYLINK:
+        return "Only link Change"
+    elif  status == RULE_STATUS.MODIFIED:
+        return "Modified"
+    elif  status == RULE_STATUS.NEW:
+        return "New"
+    elif  status == RULE_STATUS.DELETE:
+        return "Delete"
+    else:
+        return status.name
+
+
+def outputRules(rulesDicts, outFile, status):
     if outFile is None:
         return
-    
+
+    if status is None:
+        status = [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.DELETE, RULE_STATUS.MODIFIED]
+
     try:
         out = open(outFile, "w", encoding='utf-8')
     except (IOError, OSError) as e:
         print("Failed to open output file '%s': %s" % (outFile, str(e)), file=sys.stderr)
         exit(-1)
 
-    count = 0
+    countMap = {}
+    for item in status:
+        countMap[item] = 0
+    errCount = 0;
+    totalCount = 0
     print("<Rules>", file=out)
     for item in rulesDicts["ruleName"].values():
-        if status is None:
-           if item[1] != RULE_STATUS.NEW:
-              outputRule = item[0]
-              if item[1] in (RULE_STATUS.NEW, RULE_STATUS.MODIFIED):
-                  if item[2].find("ErrMsg") is not None:
-                     continue;
-                  outputRule = item[2]
-              xmlstr = prettyXML(outputRule)
-              count = count + 1
-              print(xmlstr, file=out)
-        else:# stat == status:
-            if item[1] == status and status == RULE_STATUS.MODIFIED:
-               newRulexmlstr = prettyXML(item[2])
-               oldRulexmlstr = prettyXML(item[0])
-               count = count + 1
-               print("<!--************************ -->", file=out)
-               print(oldRulexmlstr, file=out)
-               print(newRulexmlstr, file=out)
-            elif item[1] == status:
-                outputRule = item[0]
-                if status in (RULE_STATUS.NEW, RULE_STATUS.MODIFIED):
-                    outputRule = item[2]
-                    if item[2].find("ErrMsg") is not None:
-                       continue;
-                xmlstr = prettyXML(outputRule)
-                count = count + 1
-                print(xmlstr, file=out)
+        if item[1] not in status:
+            continue
+       
+        outputRule = item[0]
+        if item[1] in (RULE_STATUS.NEW, RULE_STATUS.MODIFIED):
+            outputRule = item[2]
+            if item[2].find("ErrMsg") is not None:
+                errCount = errCount + 1
+                continue;
+        xmlstr = prettyXML(outputRule)
+        print(xmlstr, file=out)
+        totalCount = totalCount + 1
+        countMap[item[1]] = countMap[item[1]] + 1
+
     print("</Rules>", file=out)
     out.close()
-    if status is None:
-        print("Total Rules %d" % count)
-    else:
-        print("%s Rules %d" % (status.name, count))
-
-def outputRules(rulesDicts, outFile):
-    if outFile is None:
-        return
+    for s in countMap.keys():
+        print("%s Rules %d" % (statusToStr(s), countMap[s]))
     
-    newRuleFile = None
-    modifiedRuleFile = None
-    deleteRuleFile = None
-    nochangeRuleFile = None
-    onlyLinkChanged = None
-    errorRuleFile = "SIGMA_error.xml"
-    if os.path.isdir(outFile):
-        outFile = outFile.rstrip()
-        newRuleFile = "%s/SIGMA_new.xml" % (outFile)
-        modifiedRuleFile = "%s/SIGMA_modified.xml" % (outFile)
-        deleteRuleFile = "%s/SIGMA_deleted.xml" % (outFile)
-        nochangeRuleFile= "%s/SIGMA_no_change.xml" % (outFile)
-        errorRuleFile = "%s/SIGMA_error.xml" % (outFile)
-        onlyLinkChanged = "%s/SIGMA_FileChange.xml" % (outFile)
-
-        #updateEventType(rulesDicts["ruleName"], outFile)
-    else:# os.path.isfile(outFile):
-        newRuleFile = outFile 
-   
-    count = 0 
-    out = open(errorRuleFile, "w", encoding='utf-8')
-    for item in rulesDicts["ruleName"].values():
-         if item[1] in (RULE_STATUS.NEW, RULE_STATUS.MODIFIED) and item[2].find("ErrMsg") is not None:
-             prettyXML(item[2])
-             xmlstr = prettyXML(item[2])
-             count = count + 1
-             print(xmlstr, file=out)
-
-    print("ERROR Rules %d" % (count))
-    out.close()
-
-    if modifiedRuleFile is None:
-        outputStatuRules(rulesDicts, newRuleFile, None) 
-    else:
-        outputStatuRules(rulesDicts, newRuleFile, RULE_STATUS.NEW) 
-        outputStatuRules(rulesDicts, nochangeRuleFile, RULE_STATUS.NOCHANGE)
-        outputStatuRules(rulesDicts, onlyLinkChanged, RULE_STATUS.ONLYLINK)
-        outputStatuRules(rulesDicts, deleteRuleFile, RULE_STATUS.DELETE)
-        outputStatuRules(rulesDicts, modifiedRuleFile, RULE_STATUS.MODIFIED)    
+    print("Rules Converted Failed %d" % errCount)
+    print("Rules Converted Successed %d" % totalCount)
 
 
 def toCsvString(orgStr):

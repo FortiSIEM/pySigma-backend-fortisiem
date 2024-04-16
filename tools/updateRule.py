@@ -26,56 +26,6 @@ def statusToStr(status):
     else:
         return status.name
 
-def updateLinkOnly(RuleFile, ymlFileList):
-    ymlfileNames = {} #filePath---> fileName
-    for ymlfilePath in ymlFileList:
-        tmp = ymlfilePath.split("/")[-1]
-        ymlfileNames[tmp.lower()] = ymlfilePath
-
-    rulesDicts = {}
-    rulesDicts["ruleName"] = {}
-
-    renameFileMap = loadRenameFileMap()
-    tree = ET.parse(RuleFile)
-    root = tree.getroot()
-    
-    countDel = 0;
-    countChange = 0;
-    countNoChange = 0;
-    for rule in root.findall('Rule'):
-        ruleName = ruleName = rule.find('Name').text.strip(' ')
-        addUpdatedStatus(rule, RULE_STATUS.NOCHANGE)
-        filePath = rule.find('SigmaFileName')
-        if filePath is None:
-            rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.NOCHANGE);
-            countNoChange = countNoChange + 1
-            continue
-        filePath = filePath.text.replace("https://github.com/SigmaHQ/sigma/blob/master/", "").strip(' ')
-        newfilePath = filePath
-        newfilePath = convertOldPath2NewPath(renameFileMap, filePath, ymlfileNames)
-        if newfilePath in ymlFileList:
-            if filePath == newfilePath:
-                addUpdatedStatus(rule, RULE_STATUS.NOCHANGE)
-                rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.NOCHANGE);
-                countNoChange = countNoChange + 1
-            else:
-                countChange = countChange + 1
-                updateFileNameInRule(rule, newfilePath)
-                addUpdatedStatus(rule, RULE_STATUS.ONLYLINK)
-                rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.ONLYLINK);
-        else:
-            countDel = countDel + 1
-            eventType = rule.find('IncidentDef').get('eventType')
-            cmd = f"sed -i s/{eventType}.*//g /projects/phoenix/data-definition/eventType/phoenix-eventtype.csv"
-            subprocess.run(cmd, shell=True)
-
-            #addUpdatedStatus(rule, RULE_STATUS.DELETE)
-            #rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.DELETE);
-    print(f"No Change {countNoChange}")
-    print(f"Only link Change {countChange}")
-    print(f"Delete {countDel}")
-    return rulesDicts
-
 def loadRulesXML(RuleFile, ymlFileList):
     ymlfileNames = {} #filePath---> fileName
     for ymlfilePath in ymlFileList:
@@ -85,32 +35,38 @@ def loadRulesXML(RuleFile, ymlFileList):
     rulesDicts = {}
     rulesDicts["ruleName"] = {}
     rulesDicts["filePath"] = {}
-    rulesDicts["ruleDes"] = {}
-
-    maxRuleIndex = 0
-    if RuleFile is None:
-       return rulesDicts, maxRuleIndex
 
     renameFileMap = loadRenameFileMap()
     tree = ET.parse(RuleFile)
     root = tree.getroot()
-
+    
     for rule in root.findall('Rule'):
         ruleName = rule.find('Name').text.strip(' ')
-        ruleName = ruleName.lower();
-        index = int(rule.get("id").split("_")[-1].strip(' '))
-        if index > maxRuleIndex:
-            maxRuleIndex = index
-        addUpdatedStatus(rule, RULE_STATUS.DELETE)
-
-        filePath = rule.find('SigmaFileName').text.strip(' ')
+        addUpdatedStatus(rule, RULE_STATUS.NOCHANGE)
+        filePath = rule.find('SigmaFileName')
+        if filePath is None:
+            rulesDicts["ruleName"][ruleName.lower()] = (rule, RULE_STATUS.NOCHANGE);
+            continue
+        filePath = filePath.text.replace("https://github.com/SigmaHQ/sigma/blob/master/", "").strip(' ')
         newfilePath = filePath
         newfilePath = convertOldPath2NewPath(renameFileMap, filePath, ymlfileNames)
+        if newfilePath in ymlFileList:
+            rulesDicts["filePath"][newfilePath] = ruleName;
+            if filePath == newfilePath:
+                addUpdatedStatus(rule, RULE_STATUS.NOCHANGE)
+                rulesDicts["ruleName"][ruleName.lower()] = (rule, RULE_STATUS.NOCHANGE);
+            else:
+                updateFileNameInRule(rule, newfilePath)
+                addUpdatedStatus(rule, RULE_STATUS.ONLYLINK)
+                rulesDicts["ruleName"][ruleName.lower()] = (rule, RULE_STATUS.ONLYLINK);
+        else:
+            #eventType = rule.find('IncidentDef').get('eventType')
+            #cmd = f"sed -i s/{eventType}.*//g /projects/phoenix/data-definition/eventType/phoenix-eventtype.csv"
+            #subprocess.run(cmd, shell=True)
+            addUpdatedStatus(rule, RULE_STATUS.DELETE)
+            rulesDicts["ruleName"][ruleName.lower()] = (rule, RULE_STATUS.DELETE);
 
-        newname = newfilePath.split("/")[-1]
-        rulesDicts["filePath"][newname.lower()] = ruleName;
-        rulesDicts["ruleName"][ruleName] = (rule, RULE_STATUS.DELETE);
-    return rulesDicts,maxRuleIndex
+    return rulesDicts
 
 def updateFileNameInRule(rule, newFilePath):
      for e in rule.iter("SigmaFileName"):
@@ -199,30 +155,16 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
          print("The new rule should not be None")
          exit(-1);
      else:
-        fileName = filePath.split("/")[-1]
-        if fileName.lower() in rulesDicts["filePath"].keys():
-            ruleName = rulesDicts["filePath"][fileName];
-        else:
+        if filePath in rulesDicts["filePath"].keys(): #update rules
+            ruleName = rulesDicts["filePath"][filePath];
+        else: #  new rules
             nameNode= newRule.find('Name');
             ruleName = filePath;
             if nameNode is not None:
                 ruleName = nameNode.text.strip(' ')
 
-
         ruleName = ruleName.lower();
 
-        '''
-        if ruleName not in rulesDicts["ruleName"].keys():
-           desNode= newRule.find('Description');
-           if desNode is not None:
-                des = desNode.text.strip(' ').lower()
-                index = des.find(" this rule is adapted from https")
-                if index != -1:
-                    des = des[0:index]
-
-                if des in rulesDicts["ruleDes"]:
-                   ruleName = rulesDicts["ruleDes"][des]
-         '''
         if ruleName in rulesDicts["ruleName"].keys() and rulesDicts["ruleName"][ruleName][0] is not None:
              oldRule = rulesDicts["ruleName"][ruleName][0]
 
@@ -237,30 +179,14 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
                 rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.MODIFIED, newRule)
                 return ruleIndex;
 
-             ruleId = oldRule.get('id');
-             newRule.set('id', ruleId)
-             
-             oldFilePath = oldRule.find('SigmaFileName').text.strip(' ')
-             newFilePath = newRule.find('SigmaFileName').text.strip(' ')
-            
-             updateFileNameInRule(oldRule, newFilePath)
-             updateFileNameInRule(newRule, newFilePath)
-                 
-             if not diffRules(newRule, oldRule):
-                 if newFilePath not in oldFilePath:
-                     addUpdatedStatus(newRule, RULE_STATUS.ONLYLINK)
-                     rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.ONLYLINK)
-                 else:
-                     addUpdatedStatus(newRule, RULE_STATUS.NOCHANGE)
-                     rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.NOCHANGE)
-
-             else: # filterstr1 != filterstr2 or groupbystr1 != groupbystr2:
+             if diffRules(newRule, oldRule):
+                 # filterstr1 != filterstr2 or groupbystr1 != groupbystr2:
+                 updateFileNameInRule(newRule, filePath)
                  finialNewRule = updateAttrFromOldToNew(oldRule, newRule) 
                  addUpdatedStatus(finialNewRule, RULE_STATUS.MODIFIED)
                  rulesDicts["ruleName"][ruleName] = (oldRule, RULE_STATUS.MODIFIED, finialNewRule)
         else:
             ruleIndex = ruleIndex + 1
-
             newFilePath = newRule.find('SigmaFileName').text.strip(' ')
             updateFileNameInRule(newRule, newFilePath)
 
@@ -269,6 +195,11 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
         return ruleIndex
 
 def updateAttrFromOldToNew(oldRule, newRule):
+    ruleId = oldRule.get('id');
+    for elem in newRule.iter("Rule"):
+        elem.set('id', ruleId)
+             
+
     eventType = oldRule.find('IncidentDef').get('eventType')
     for elem in newRule.iter('IncidentDef'):
         elem.set('eventType', eventType)
