@@ -131,7 +131,7 @@ class FortisiemConfig:
          keyword = tmp.get("keyword", None) 
          tmp = tmp.get(code, None)
          if tmp is not None and ',' in tmp:
-             return tmp.split(",")
+             return tmp.split(","), keyword
 
          return tmp, keyword
     
