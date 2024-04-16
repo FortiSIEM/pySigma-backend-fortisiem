@@ -124,6 +124,7 @@ ProcessName,procName
 QNAME,destName
 TargetFilename,fileName
 User,user
+SourceUser,user
 Image,procName
 ParentImage,parentProcName
 CommandLine,command
