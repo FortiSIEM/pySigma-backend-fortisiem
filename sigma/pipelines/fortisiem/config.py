@@ -130,6 +130,9 @@ class FortisiemConfig:
              return None,None
          keyword = tmp.get("keyword", None) 
          tmp = tmp.get(code, None)
+         if tmp is not None and ',' in tmp:
+             return tmp.split(",")
+
          return tmp, keyword
     
     def convertEvtID2EvtType(self, service, code, provider=None):
