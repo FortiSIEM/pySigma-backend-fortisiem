@@ -160,7 +160,6 @@ def main():
             print("""It is a directory where YAML file is in or It's a csv file listed YAML file name Input one with --inputs/-i\n
 or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
             sys.exit(-1)
-        sys.exit(-1)
     elif os.path.isdir(cmdargs.inputs):
         sigmaFileList = getFilesListFromInputDir(cmdargs.inputs)
     elif os.path.isfile(cmdargs.inputs):
