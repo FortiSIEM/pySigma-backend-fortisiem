@@ -238,12 +238,12 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
             print(sigmaFile)
             sigmaCollection = loadYml(sigmaFile); 
             if not sigmaCollection:
-                print("Failed to parser Sigma file %s:\n" % (sigmaFile), file=sys.stderr)
+                print("Failed to parser YAML %s:\n" % (sigmaFile), file=sys.stderr)
                 continue
 
             for rule in sigmaCollection.rules:
                if config.skipRuleByLogsource(rule):
-                   print("Skip to generate rule for Sigma file %s:\n" % (sigmaFile), file=sys.stderr)
+                   print("Skip to generate rule for YAML %s:\n" % (sigmaFile), file=sys.stderr)
                    continue
 
                processing_pipeline = fortisiem_pipeline(config, rule)
@@ -262,16 +262,16 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
                    formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId, forGUI)
                    xmlRules = backend.convert(rule, formater)
         except OSError as e:
-            errMsg = "Failed to open. Err:%s" % str(e)
+            errMsg = "Failed to open YAML. Err:%s" % str(e)
             xmlRules.append(generateErrRule(errMsg, sigmaFile))
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
-            errMsg = "File is not a valid YAML. Err: %s" % str(e)
+            errMsg = "Invalid YAML. Err: %s" % str(e)
             xmlRules.append(generateErrRule(errMsg, sigmaFile))
         except (SigmaConditionError,SigmaRelatedError) as e:
-            errMsg = "File is not a valid YAML. Err: %s" % str(e)
+            errMsg = "Invalid YAML. Err: %s" % str(e)
             xmlRules.append(generateErrRule(errMsg, sigmaFile))
         except (NotImplementedError, TypeError) as e:
-            errMsg = "Failed to converted . %s" % str(e)
+            errMsg = "Failed to convert YAML. Err: %s" % str(e)
             xmlRules.append(generateErrRule(errMsg, sigmaFile))
 
         for item in xmlRules:

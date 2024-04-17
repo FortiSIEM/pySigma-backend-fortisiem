@@ -90,7 +90,7 @@ def outputRules(rulesDicts, outFile, status):
     print("Rules Converted Successed %d" % totalCount)
     print("Rules Converted Failed %d" % errCount)
     if errCount != 0:
-        print("Error rules in Converted_Failed.xml")
+        print("    Error rules is in Converted_Failed.xml")
 
 
 def toCsvString(orgStr):
