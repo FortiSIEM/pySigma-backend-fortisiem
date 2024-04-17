@@ -16,7 +16,7 @@ from sigma.backends.fortisiem.fortisiem import FortisemBackend
 from sigma.backends.fortisiem.xmlRuleFormater import FortisiemXMLRuleFormater 
 sigma_path = os.getcwd()
 sys.path.insert(0, sigma_path)
-from tools.output import outputRules,generateErrRule
+from tools.output import outputRules,generateErrRule,getEventTypeCsv
 from tools.updateRule import addNewRule, loadRulesXML, RULE_STATUS
 import codecs
 
@@ -37,7 +37,8 @@ How to deal with the YAML file.
     FullUpdate: Update all rules in the '--ruleFile' file. Delete, update and add rules in '--ruleFile'
     Diff: Get deleted rules between two rule files.
     ReportToCsv: Generate CSV file from report file.
-    RuleToCsv: Generate CSV file from rule files.""")
+    RuleToCsv: Generate CSV file from rule files.
+    GetEventTypeCsv: Generate eventType csv from a rule file""")
     #If forGui is False, the xml format can be imported into FortiSIEM by backend command
     argparser.add_argument("--forGui",action='store_true', help="The XML format can be imported into FortiSIEM by GUI")
     return argparser
@@ -141,6 +142,16 @@ def main():
             print("There is not a file used to output result. Input one with--output/-o.", file=sys.stderr)
             exit(-1)
        getDeletedRulesBetweenTwoFiles(cmdargs.ruleFile, cmdargs.inputs, outFile);
+       exit(-1)
+
+    if cmdargs.action == "GetEventTypeCsv":
+       if cmdargs.inputs is None:
+            print("There is not  rule file. Input one with --inputs/-i.", file=sys.stderr)
+            exit(-1)
+       if outFile is None:
+            print("There is not a file used to output result. Input one with--output/-o.", file=sys.stderr)
+            exit(-1)
+       getEventTypeCsv(cmdargs.inputs, outFile)
        exit(-1)
 
 

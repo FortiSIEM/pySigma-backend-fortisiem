@@ -105,6 +105,26 @@ def toCsvString(orgStr):
      csvString = "\"%s\"" % csvString;
   return csvString;        
 
+
+def getEventTypeCsv(ruleFilePath, csvFile):
+    out = open(csvFile, "w", encoding='utf-8')
+    tree = ET.parse(ruleFilePath)
+    root = tree.getroot()
+    rules = root.findall('Rule')
+    for rule in rules:
+        eventType = rule.find('IncidentDef').get('eventType')
+        des = rule.find('Description').text
+        index = des.find('This rule is adapted from')
+        if index:
+            des = des[0:index].strip(" ").strip(".")
+        index = des.find('.')
+        if index:
+            des = des[0:index].strip(" ")
+
+        print(f"%s,%s,PH_SYS_EVENT_Info,1" % (eventType, toCsvString(des)), file=out)
+    out.close();
+    exit(0)
+
 '''
 Append some columns in csv
 def outputRulesCsv(inputfile, csvFile):
