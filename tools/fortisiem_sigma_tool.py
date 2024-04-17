@@ -16,7 +16,7 @@ from sigma.backends.fortisiem.fortisiem import FortisemBackend
 from sigma.backends.fortisiem.xmlRuleFormater import FortisiemXMLRuleFormater 
 sigma_path = os.getcwd()
 sys.path.insert(0, sigma_path)
-from tools.output import outputRules
+from tools.output import outputRules,generateErrRule
 from tools.updateRule import addNewRule, loadRulesXML, RULE_STATUS
 import codecs
 
@@ -222,6 +222,7 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
     config.loadLogsourceToETMap("tools/config/Logsource2ET.csv")
 
     for sigmaFile in needHandledYmlList:
+        xmlRules = []
         try:
             print(sigmaFile)
             sigmaCollection = loadYml(sigmaFile); 
@@ -249,20 +250,23 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
                    ruleId = getRuleId(rulesDicts, sigmaFile, ruleType, ruleIndex)
                    formater = FortisiemXMLRuleFormater(config, sigmaFile, ruleId, forGUI)
                    xmlRules = backend.convert(rule, formater)
-
-
-               for item in xmlRules:
-                    ruleIndex = addNewRule(rulesDicts, item, sigmaFile, ruleIndex)
-
         except OSError as e:
-            print("\nFailed to open %s:\n    %s" % (sigmaFile, str(e)), file=sys.stderr)
+            errMsg = "Failed to open. Err:%s" % str(e)
+            xmlRules.append(generateErrRule(errMsg, sigmaFile))
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
-            print("\n%s is no valid YAML:\n    %s" % (sigmaFile, str(e)), file=sys.stderr)
+            errMsg = "File is not a valid YAML. Err: %s" % str(e)
+            xmlRules.append(generateErrRule(errMsg, sigmaFile))
         except (SigmaConditionError,SigmaRelatedError) as e:
-            print("\n%s is no valid YAML:\n    %s" % (sigmaFile, str(e)), file=sys.stderr)
+            errMsg = "File is not a valid YAML. Err: %s" % str(e)
+            xmlRules.append(generateErrRule(errMsg, sigmaFile))
         except (NotImplementedError, TypeError) as e:
-            print("\n%s converted failed:\n    %s" % (sigmaFile, str(e)),file=sys.stderr)
-   
+            errMsg = "Failed to converted . %s" % str(e)
+            xmlRules.append(generateErrRule(errMsg, sigmaFile))
+
+        for item in xmlRules:
+            ruleIndex = addNewRule(rulesDicts, item, sigmaFile, ruleIndex)
+  
+    #Output rules
     if cmdargs.action == "Update":
         outputRules(rulesDicts, outFile, [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.DELETE, RULE_STATUS.MODIFIED])
     elif cmdargs.action == "FullUpdate":

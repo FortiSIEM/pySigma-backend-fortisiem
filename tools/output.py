@@ -14,6 +14,13 @@ def prettyXML(elem):
      content = etree.tostring(root, pretty_print = True, encoding = str)
      return content
 
+def generateErrRule(errMsg, filePath):
+    rule = ET.fromstring("<Rule/>")
+    ET.SubElement(rule, "ErrMsg")
+    ET.SubElement(rule, "SigmaFileName")
+    rule.find("ErrMsg").text = errMsg
+    rule.find("SigmaFileName").text = filePath
+    return prettyXML(rule)
 
 def statusToStr(status):
     if status == RULE_STATUS.NOCHANGE:
@@ -37,8 +44,10 @@ def outputRules(rulesDicts, outFile, status):
     if status is None:
         status = [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.DELETE, RULE_STATUS.MODIFIED]
 
+    errFile = "Converted_Failed.xml"
     try:
         out = open(outFile, "w", encoding='utf-8')
+        errOut = open(errFile, "w", encoding='utf-8')
     except (IOError, OSError) as e:
         print("Failed to open output file '%s': %s" % (outFile, str(e)), file=sys.stderr)
         exit(-1)
@@ -55,10 +64,19 @@ def outputRules(rulesDicts, outFile, status):
        
         outputRule = item[0]
         if item[1] in (RULE_STATUS.NEW, RULE_STATUS.MODIFIED):
-            outputRule = item[2]
-            if item[2].find("ErrMsg") is not None:
+            if item[2].find("ErrMsg") is None:
+                outputRule = item[2]
+            else:
                 errCount = errCount + 1
-                continue;
+                errXmlStr = prettyXML(item[2])
+                print(errXmlStr, file=errOut)
+
+            #When new rule is error 
+            #   Status is RULE_STATUS.NEW, it will be None. so don't need output it into new rule file..
+            #   Status is RULE_STATUS.MODIFIED, we will output the old rule into new rule file..
+            if outputRule is None:
+                 continue;
+
         xmlstr = prettyXML(outputRule)
         print(xmlstr, file=out)
         totalCount = totalCount + 1
@@ -69,8 +87,10 @@ def outputRules(rulesDicts, outFile, status):
     for s in countMap.keys():
         print("%s Rules %d" % (statusToStr(s), countMap[s]))
     
-    print("Rules Converted Failed %d" % errCount)
     print("Rules Converted Successed %d" % totalCount)
+    print("Rules Converted Failed %d" % errCount)
+    if errCount != 0:
+        print("Error rules in Converted_Failed.xml")
 
 
 def toCsvString(orgStr):

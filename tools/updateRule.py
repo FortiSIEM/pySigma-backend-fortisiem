@@ -150,21 +150,21 @@ def addSigmaStatus(rule, status):
     rule.find("SIGMAStatus").text = status
 
 def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
-     newRule = ET.fromstring(newRuleXML)
+     newRule = prepareRule(newRuleXML)
      if newRule is None:
          print("The new rule should not be None")
          exit(-1);
      else:
+         
         if filePath in rulesDicts["filePath"].keys(): #update rules
             ruleName = rulesDicts["filePath"][filePath];
-        else: #  new rules
+        else: #new rules
             nameNode= newRule.find('Name');
             ruleName = filePath;
             if nameNode is not None:
                 ruleName = nameNode.text.strip(' ')
 
         ruleName = ruleName.lower();
-
         if ruleName in rulesDicts["ruleName"].keys() and rulesDicts["ruleName"][ruleName][0] is not None:
              oldRule = rulesDicts["ruleName"][ruleName][0]
 
@@ -189,10 +189,25 @@ def addNewRule(rulesDicts, newRuleXML : str, filePath, ruleIndex):
             ruleIndex = ruleIndex + 1
             newFilePath = newRule.find('SigmaFileName').text.strip(' ')
             updateFileNameInRule(newRule, newFilePath)
-
             addUpdatedStatus(newRule, RULE_STATUS.NEW)
             rulesDicts["ruleName"][ruleName] = (None, RULE_STATUS.NEW, newRule)
+
         return ruleIndex
+
+def prepareRule(ruleXML):
+    rule = ET.fromstring(ruleXML)
+    if rule is None:
+        return None
+
+    ruleConstr = rule.find("./PatternClause/SubPattern/SingleEvtConstr")
+    if ruleConstr is not None:
+        re_pattarn = r"\beventType(\s*=\s*|\s*!=\s*|\s+(?:NOT\s+)?CONTAIN |\s+(?:NOT\s+)?REGEXP |\s+(?:NOT\s+)?IN | IS | \s+(?:NOT\s+)?BETWEEN )"
+        matches = re.search(re_pattarn, ruleConstr.text)
+        if not matches:
+           ET.SubElement(rule, "ErrMsg")
+           rule.find("ErrMsg").text = "There is no eventType"
+
+    return rule
 
 def updateAttrFromOldToNew(oldRule, newRule):
     ruleId = oldRule.get('id');
