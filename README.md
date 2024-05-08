@@ -1,10 +1,10 @@
-![Tests](https://github.com/meiliumeiliu/pySigma-backend-fortisiem/actions/workflows/test.yml/badge.svg)
-![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/meiliumeiliu/GitHub Gist identifier containing coverage badge JSON expected by shields.io./raw/meiliumeiliu-pySigma-backend-fortisiem.json)
+![Tests](https://github.com/FortiSIEM/pySigma-backend-fortisiem/actions/workflows/test.yml/badge.svg)
+![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/FortiSIEM/GitHub Gist identifier containing coverage badge JSON expected by shields.io./raw/FortiSIEM-pySigma-backend-fortisiem.json)
 ![Status](https://img.shields.io/badge/Status-pre--release-orange)
 
-# pySigma fortisiem Backend
+# pySigma FortiSIEM Backend
 
-This is the fortisiem backend for pySigma. It provides the package `sigma.backends.fortisiem` with the `fortisiemBackend` class.
+This is the FortiSIEM backend for pySigma. It provides the package `sigma.backends.fortisiem` with the `FortiSIEMBackend` class.
 Further, it contains the following processing pipelines in `sigma.pipelines.fortisiem`:
 
 * pipeline1: purpose
@@ -12,10 +12,10 @@ Further, it contains the following processing pipelines in `sigma.pipelines.fort
 
 It supports the following output formats:
 
-* default: plain fortisiem queries
+* default: plain FortiSIEM queries
 * format_1: purpose
 * format_2: purpose
 
 This backend is currently maintained by:
 
-* [Mei Liu](https://github.com/meiliumeiliu/)
+* [Mei Liu](https://github.com/FortiSIEM/)
