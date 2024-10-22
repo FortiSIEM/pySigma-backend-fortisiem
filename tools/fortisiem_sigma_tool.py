@@ -16,7 +16,7 @@ from sigma.backends.fortisiem.fortisiem import FortisemBackend
 from sigma.backends.fortisiem.xmlRuleFormater import FortisiemXMLRuleFormater 
 sigma_path = os.getcwd()
 sys.path.insert(0, sigma_path)
-from tools.output import outputRules,generateErrRule,getEventTypeCsv
+from tools.output import outputRules,generateErrRule,getEventTypeCsv,getDeletedRulesBetweenTwoFiles
 from tools.updateRule import addNewRule, loadRulesXML, RULE_STATUS
 import codecs
 
@@ -195,7 +195,7 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
             print("--ruleFile/-r can't be empty. It's a rule file which needs to be updated.")
             sys.exit(-1)
         rulesDicts = loadRulesXML(cmdargs.ruleFile, sigmaFileList);
-        outputRules(rulesDicts, outFile, None);
+        outputRules(rulesDicts, outFile, [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.MODIFIED]);
         sys.exit(0)
     elif cmdargs.action == "FullUpdate":
         if cmdargs.ruleFile is None:
