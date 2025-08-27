@@ -5,12 +5,13 @@ import yaml
 import re
 import copy
 from sigma.rule import SigmaDetection, SigmaRule
+from sigma.types import SigmaString,SpecialChars
 
 Windows_logsource_Condition_map = {
  "process_creation":{"eventType": "Win-Sysmon-1-Create-Process"},
  "network_connection": {"eventType": "Win-Sysmon-3-Network-Connect*"},
  "dns_query":{"eventType": "Win-Sysmon-22-DNS-Query"},
- "registry_event":{"eventType": "Win-Sysmon-12-Registry-*|Win-Sysmon-13-Registry-*|Win-Sysmon-14-Registry-*"},
+ "registry_event":{"eventType": "Win-Sysmon-12-Registry-.*|Win-Sysmon-13-Registry-.*|Win-Sysmon-14-Registry-.*"},
  "file_event":{"eventType": "Win-Sysmon-11-FileCreate"},
  "process_access":{"eventType": "Win-Sysmon-10-ProcessAccess"},
  "image_load":{"eventType": "Win-Sysmon-7-Image-Loaded"},
@@ -186,9 +187,26 @@ class FortisiemConfig:
         val = self.convertEvtID2EvtType(service, code, provider)
         return val
 
+    def convert_value_to_str(self, value):
+        if type(value) != sigma.types.SigmaString: 
+           return str(value)
+
+        s = ""
+        for c in value:
+            if isinstance(c, SpecialChars):  # special handling for special characters
+                if c == SpecialChars.WILDCARD_MULTI:
+                    s += ".*"
+                    continue
+                elif c == SpecialChars.WILDCARD_SINGLE:
+                    s += "?"
+                    continue
+            s += c
+        return s
+
     def convertDetectionItemValue(self, fieldName, value, product, service, provider):
         if fieldName == "eventType":
-            vals = self.formatEvtTypeVal(str(value), product, service, provider);
+            s=self.convert_value_to_str(value);
+            vals = self.formatEvtTypeVal(s, product, service, provider);
             return vals
         else:
             #print("WARNING: Unsupport to convert value of %s" % fieldName)

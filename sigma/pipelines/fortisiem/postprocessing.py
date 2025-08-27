@@ -224,9 +224,13 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
     #If Sigma has 'user startwith', we should convert to user startwith OR domain startwith (in case the user field has no domain)
     def formCondition(self, attr, op, val):
        if attr != "user":
+           if op == '=' or op == '!=':
+              return f"{attr}{op}{val}";
            return f"{attr} {op} {val}";
 
        if op != "REGEXP" and op != "CONTAIN":
+           if op == '=' or op == '!=':
+              return f"{attr}{op}{val}";
            return f"{attr} {op} {val}";
        
        val.replace("\\\\", "#TEMP_TOKEN#")

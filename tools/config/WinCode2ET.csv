@@ -62,6 +62,11 @@ Windows,Provider_Name,Win-PrintService
 329,Win-PrintService-Publish-Printer-Failed
 331,Win-PrintService-Publish-Printer-Failed
 333,Win-PrintService-Publish-Printer-Failed
+16,Win-System-UpdateClient-16
+20,Win-System-UpdateClient-20
+24,Win-System-UpdateClient-24
+213,Win-System-UpdateClient-213
+217,Win-System-UpdateClient-217
 ######
 Windows,security-mitigations,Win-Security-Mitigation
 11,Win-Security-Mitigation-11

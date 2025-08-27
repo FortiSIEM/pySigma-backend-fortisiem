@@ -1,4 +1,5 @@
 ##not find in WinOSWmiParser.xml
+DistinguishedName,resourceName
 TargetDetails,details
 Account_Name,user
 Computer_Name,computer

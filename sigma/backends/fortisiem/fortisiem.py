@@ -57,7 +57,7 @@ class FortisemBackend(TextQueryBackend):
     in_expressions_allow_wildcards : ClassVar[bool] = True
 
     field_in_list_expression : ClassVar[str] = "{field} IN ({list})"
-    list_separator : ClassVar[str] = ", "
+    list_separator : ClassVar[str] = ","
     reg_or_separator : ClassVar[str] = "|"
 
     unbound_value_str_expression : ClassVar[str] = '{value}'
@@ -71,6 +71,7 @@ class FortisemBackend(TextQueryBackend):
         self.query_settings = query_settings
         self.output_settings = {"dispatch.earliest_time": min_time, "dispatch.latest_time": max_time}
         self.output_settings.update(output_settings)
+        self.field_equals_field_expression = "{field1} = {field2}"
 
     @staticmethod
     def _generate_settings(settings):
@@ -396,7 +397,7 @@ class FortisemBackend(TextQueryBackend):
 
             convertedStr = None
             if len(converteds) > 1:
-                converteds = sorted(converteds)
+                #converteds = sorted(converteds)
                 convertedStr = self.or_token.join(converteds)
                 convertedStr = "( %s )" % convertedStr
             else:
@@ -443,7 +444,7 @@ class FortisemBackend(TextQueryBackend):
 
             convertedStr = None
             if len(converteds) > 1:
-                converteds = sorted(converteds)
+                #converteds = sorted(converteds)
                 convertedStr = self.and_token.join(converteds)
                 convertedStr = "( %s )" % convertedStr
             else:
