@@ -118,6 +118,12 @@ ServerName,serverName
 DeviceName,hostName
 AuditSourceName,resourceName
 TargetLogonId,winLogonId
+PreAuthType,authenMethod
+IsatapRouter,router,ip
+IpPort,ipPort,int
+SigningUsed,signingUsed
+EncyptionUsed,encyptionUsed
+AdditionalInfo,details
 ##find in WinOSWmiParser.xml
 ComputerName,computer
 CurrentDirectory,dirName
@@ -164,6 +170,7 @@ DestinationHostname,destName
 DestinationAddress,destIpAddr,ip
 ObjectType,osObjType
 ObjectName,osObjName
+ObjectDN,objId
 SourceImage,procName
 SourceAddress,srcIpAddr,ip
 SourcePort,srcIpPort,int
@@ -201,6 +208,7 @@ ProcessCommandLine,command
 Channel,activityType
 ServiceType,serviceType
 ServiceStartType,serviceStartType
+Configuration,configValue
 #network
 dst_ip,destIpAddr,ip
 src_ip,srcIpAddr,ip
