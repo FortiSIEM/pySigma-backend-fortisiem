@@ -4,6 +4,8 @@ import sigma
 import yaml
 import re
 import copy
+import os
+from pathlib import Path
 from sigma.rule import SigmaDetection, SigmaRule
 from sigma.types import SigmaString,SpecialChars
 
@@ -40,19 +42,48 @@ class FortisiemConfig:
                     if tmp is None:
                         self.logsource_Condition_map[row[0]] = {}
                     self.logsource_Condition_map[row[0]][row[1]] = {"eventType": row[2]}
-     
-    def loadFieldNameToFortiSIEMAttrNameMap(self, csvFileName):
-        with open(csvFileName, newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',')
-            for row in spamreader:
-                if len(row) < 2:
-                    continue;
-                elif len(row) == 2:
-                    self.fortisiem_attr_type_dict[row[1].strip(" ")] = "string"
-                else:
-                    self.fortisiem_attr_type_dict[row[1].strip(" ")] = row[2]
 
-                self.fortisiem_attrs_dict[row[0]] = row[1].strip(" ")
+    def getFilesListFromDir(self, filedir):
+        tmp= []
+        filelist = []
+        for root, dirs, files in os.walk(filedir):
+            for file in files:
+                filelist.append(os.path.join(root, file))
+
+        for name in filelist:
+            if name.endswith(".csv"):
+               tmp.append(name)
+        return tmp
+
+    def loadFieldNameToFortiSIEMAttrNameMap(self, attrFolder):
+        csvFiles = self.getFilesListFromDir(attrFolder);
+
+        for csvFullFilePath in csvFiles: 
+            with open(csvFullFilePath, newline='') as csvfile:
+                 product = Path(csvFullFilePath).stem.lower()
+                 print("DDDDDDDD")
+                 print(product)
+                 print("DDDDDDDD")
+                 spamreader = csv.reader(csvfile, delimiter=',')
+                 attrs_dict = {}
+                 for row in spamreader:
+                     if len(row) < 2:
+                        continue;
+                     elif len(row) == 2:
+                        self.fortisiem_attr_type_dict[row[1].strip(" ")] = "string"
+                     else:
+                        self.fortisiem_attr_type_dict[row[1].strip(" ")] = row[2]
+                     attrs_dict[row[0]] = row[1].strip(" ")
+
+                 self.fortisiem_attrs_dict[product] = attrs_dict
+
+    def getFortiSIEMAttrDict(self, product, service):
+        tmp = self.fortisiem_attrs_dict.get(product.lower(), {})
+        print("XXXX")
+        print(product)
+        print(tmp)
+        print("XXXX")
+        return tmp;
 
     def getFortiSIEMAttrType(self, attrName):
         return self.fortisiem_attr_type_dict.get(attrName, "string")

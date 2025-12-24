@@ -24,16 +24,17 @@ def fortisiem_pipeline(config: FortisiemConfig, rule: SigmaRule) -> ProcessingPi
 
     fieldProcessingItem = ProcessingItem(     # Field mappings
                 identifier="fortisiem_field_mapping",
-                transformation=FieldMappingTransformation(config.fortisiem_attrs_dict)
+                transformation=FieldMappingTransformation(config.getFortiSIEMAttrDict(product, service)) 
                 )
     processingItemItems.append(fieldProcessingItem)
 
-    replaceProcessingItem = ProcessingItem(
+    if product == "windows": 
+        replaceProcessingItem = ProcessingItem(
                 identifier=f"fortisiem_field_replace",
                 transformation=FortisiemReplaceDetectionItemTransformation(config, product, service),
                 field_name_conditions=[IncludeFieldCondition(["eventType", "EventID"])],
             )
-    processingItemItems.append(replaceProcessingItem)
+        processingItemItems.append(replaceProcessingItem)
 
     dropProcessingItem = ProcessingItem(
                 identifier=f"fortisiem_field_drop",

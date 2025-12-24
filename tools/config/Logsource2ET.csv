@@ -11,3 +11,5 @@ windows,driver_load,Win-Sysmon-6-Driver-Loaded,
 windows,process_termination,Win-Sysmon-5-Process-Terminated,
 #####
 linux,file_event,FSM_LINUX_FILE_*
+####
+fortigate,event,FortiGate-*,
