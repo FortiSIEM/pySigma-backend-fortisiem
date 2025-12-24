@@ -61,9 +61,6 @@ class FortisiemConfig:
         for csvFullFilePath in csvFiles: 
             with open(csvFullFilePath, newline='') as csvfile:
                  product = Path(csvFullFilePath).stem.lower()
-                 print("DDDDDDDD")
-                 print(product)
-                 print("DDDDDDDD")
                  spamreader = csv.reader(csvfile, delimiter=',')
                  attrs_dict = {}
                  for row in spamreader:
@@ -79,10 +76,6 @@ class FortisiemConfig:
 
     def getFortiSIEMAttrDict(self, product, service):
         tmp = self.fortisiem_attrs_dict.get(product.lower(), {})
-        print("XXXX")
-        print(product)
-        print(tmp)
-        print("XXXX")
         return tmp;
 
     def getFortiSIEMAttrType(self, attrName):
