@@ -1,0 +1,8 @@
+#product,title,eventType
+fortigate,FortiGate - New Administrator Account Created,FortiGate-event-admin-add
+fortigate,FortiGate - Firewall Address Object Added,FortiGate-event-config-objattr
+fortigate,FortiGate - New Local User Created,FortiGate-event-add-user
+fortigate,FortiGate - New Firewall Policy Added,FortiGate-event-config-objattr
+fortigate,FortiGate - User Group Modified,FortiGate-event-config-objattr
+fortigate,FortiGate - New VPN SSL Web Portal Added,FortiGate-event-config-objattr
+fortigate,FortiGate - VPN SSL Settings Modified,FortiGate-event-config-objattr

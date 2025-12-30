@@ -228,9 +228,9 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
     config = FortisiemConfig(); 
     config.loadMitreAttackMatrixFile("tools/config/MITRE-Attack-matrix.csv");
     config.loadFieldNameToFortiSIEMAttrNameMap("tools/config/Attr2InternalAttr");
-    config.loadFieldValToFortiSIEMFieldValMap("tools/config/WinCode2ET.csv")
+    config.loadFieldValToFortiSIEMFieldValMap("tools/config/AttrVal2InternalVal/windows-EventID.csv")
     config.loadLogsourceUsedToSkipRuleMap("tools/config/SkipRuleByLogsource.csv")
-    config.loadLogsourceToETMap("tools/config/Logsource2ET.csv")
+    config.loadEvtTypeCondition("tools/config/EvtTypeConditionAppend")
 
     for sigmaFile in needHandledYmlList:
         xmlRules = []

@@ -9,28 +9,21 @@ from pathlib import Path
 from sigma.rule import SigmaDetection, SigmaRule
 from sigma.types import SigmaString,SpecialChars
 
-Windows_logsource_Condition_map = {
- "process_creation":{"eventType": "Win-Sysmon-1-Create-Process"},
- "network_connection": {"eventType": "Win-Sysmon-3-Network-Connect*"},
- "dns_query":{"eventType": "Win-Sysmon-22-DNS-Query"},
- "registry_event":{"eventType": "Win-Sysmon-12-Registry-.*|Win-Sysmon-13-Registry-.*|Win-Sysmon-14-Registry-.*"},
- "file_event":{"eventType": "Win-Sysmon-11-FileCreate"},
- "process_access":{"eventType": "Win-Sysmon-10-ProcessAccess"},
- "image_load":{"eventType": "Win-Sysmon-7-Image-Loaded"},
- "driver_load":{"eventType": "Win-Sysmon-6-Driver-Loaded"},
- "process_termination":{"eventType": "Win-Sysmon-5-Process-Terminated"},
- }
-
 class FortisiemConfig:
     fortisiem_attrs_dict = {}
     fortisiem_attr_type_dict = {}
     skip_rule_by_logsource_dict= {}
     event_id_2_event_type_dict = {}
     technique_dict = {}
-    logsource_Condition_map = {}
 
+    #logsource_Condition_map = {}
+    #title_Condition_map = {}
+
+    #{product: { attrName: {attrVal : ET} } }
+    evt_type_condition = {}
 
     #def __init__(self):
+
     def loadLogsourceToETMap(self, csvFileName):
         with open(csvFileName, newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',')
@@ -54,6 +47,31 @@ class FortisiemConfig:
             if name.endswith(".csv"):
                tmp.append(name)
         return tmp
+
+    #EvtTypeConditionAppend
+    def loadEvtTypeCondition(self, attrFolder):
+        csvFiles = self.getFilesListFromDir(attrFolder);
+        for csvFullFilePath in csvFiles:
+            with open(csvFullFilePath, newline='') as csvfile:
+                 #title
+                 attrName = Path(csvFullFilePath).stem.lower()
+                 spamreader = csv.reader(csvfile, delimiter=',')
+                 for row in spamreader:
+                     if len(row) < 3:
+                        continue;
+                     else:
+                        product = row[0].strip(" ").lower()
+                        tmp = self.evt_type_condition.get(product, None)
+                        if tmp is None:
+                           self.evt_type_condition[product] = {}
+                           self.evt_type_condition[product][attrName] = {}
+
+                        tmp = self.evt_type_condition[product].get(attrName, None)
+                        if tmp is None:
+                            self.evt_type_condition[product][attrName] = {}
+
+                        self.evt_type_condition[product][attrName][row[1].lower().strip(" ")] = {"eventType": row[2].strip(" ")}
+
 
     def loadFieldNameToFortiSIEMAttrNameMap(self, attrFolder):
         csvFiles = self.getFilesListFromDir(attrFolder);
@@ -240,6 +258,7 @@ class FortisiemConfig:
         product = None
         service = None
         logsource = rule.logsource
+        title = rule.title.lower()
         if logsource is not None:
             product = logsource.product
             service = logsource.service
@@ -251,12 +270,22 @@ class FortisiemConfig:
             if "EventID" in currArr:
                 return  product, service, None
 
-        serviceETMap = self.logsource_Condition_map.get(product, None)
-        if not serviceETMap:
+        product2ETCondition = self.evt_type_condition.get(product, None);
+        if not product2ETCondition:
             return product, service, None
 
-        if service in serviceETMap:
-            return product, service, serviceETMap[service]
+        title2ETCondition = product2ETCondition.get('title', None)
+        if title2ETCondition:
+           ETConditon = title2ETCondition.get(title, None);
+           if ETConditon:
+               return product, service, ETConditon
+
+        logsource2ETCondition = product2ETCondition.get('logsource', None)
+        if logsource2ETCondition:
+           ETConditon  = logsource2ETCondition.get(service, None) 
+           if ETConditon:
+               return product, service, ETConditon
+
         #else:
         #    print("WARNING: Unsupport to get condition for %s in getConditionByLogsource" % product )
         return product, service, None
