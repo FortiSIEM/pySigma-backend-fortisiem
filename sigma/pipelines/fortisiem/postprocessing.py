@@ -120,7 +120,7 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
                if token == "AND":
                   token = "OR"
                elif token == "OR":
-                   token == "AND"
+                   token = "AND"
 
            if remainStr[0] == '(':
                 remainStr, subRuleCondition = self.formatParenthesesExpression(remainStr, partConditionIsNot)
