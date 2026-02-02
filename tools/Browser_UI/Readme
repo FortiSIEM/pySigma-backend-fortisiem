@@ -1,0 +1,6 @@
+1. goto pySigma-backend-fortisiem/Browser_UI
+2. put rule file in pySigma-backend-fortisiem/tmp
+3. start server
+   python3 backend/app.py &>/dev/null &
+   python3 -m http.server 8888 &>/dev/null &
+

@@ -4,14 +4,15 @@ from sigma.processing.conditions import IncludeFieldCondition
 from sigma.processing.pipeline import ProcessingItem, ProcessingPipeline, QueryPostprocessingItem
 from sigma.pipelines.fortisiem.postprocessing import QueryToFortisiemExpressionTransformation
 from sigma.pipelines.fortisiem.config import FortisiemConfig 
-from sigma.pipelines.fortisiem.detectionItemTransformation import FortisiemReplaceDetectionItemTransformation
+from sigma.pipelines.fortisiem.detectionItemTransformation import FortisiemReplaceDetectionItemTransformation, FortisiemFieldMappingTransformation
 from sigma.rule import SigmaRule
+from typing import Dict, Any
 
 # TODO: the following code is just an example extend/adapt as required.
 # See https://sigmahq-pysigma.readthedocs.io/en/latest/Processing_Pipelines.html for further documentation.
 
 @Pipeline
-def fortisiem_pipeline(config: FortisiemConfig, rule: SigmaRule) -> ProcessingPipeline:        # Processing pipelines should be defined as functions that return a ProcessingPipeline object.
+def fortisiem_pipeline(config: FortisiemConfig, rule: SigmaRule, otherParam: Dict[str, Any] = None) -> ProcessingPipeline:        # Processing pipelines should be defined as functions that return a ProcessingPipeline object.
     product, service, contition = config.shouldAppendCondition(rule)
     processingItemItems = []
     if contition:
@@ -24,7 +25,7 @@ def fortisiem_pipeline(config: FortisiemConfig, rule: SigmaRule) -> ProcessingPi
 
     fieldProcessingItem = ProcessingItem(     # Field mappings
                 identifier="fortisiem_field_mapping",
-                transformation=FieldMappingTransformation(config.getFortiSIEMAttrDict(product, service)) 
+                transformation=FortisiemFieldMappingTransformation(config.getFortiSIEMAttrDict(product, service), otherParam) 
                 )
     processingItemItems.append(fieldProcessingItem)
 

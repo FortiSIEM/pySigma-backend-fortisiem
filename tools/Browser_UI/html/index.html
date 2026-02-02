@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sigma → FortiSIEM Rule Update</title>
+<script src="../js/util.js"></script>
+<script src="../js/indexAction.js" defer></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  label {
+    white-space: nowrap;
+    font-weight: bold;
+  }
+  button {
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .help-text {
+    font-size: 12px;  
+    color: #666;          
+    margin-left: 60px;    
+    line-height: 1.4;      
+  }
+
+  .help-text b {
+    font-weight: 600;     
+    color: #333;
+  }
+</style>
+</head>
+
+<body>
+
+<h2>FortiSIEM SIGMA Rule Converter</h2>
+<div>
+  <button id="updateRulesBtn" onclick="UpdateRules()">Update Rules</button>
+</div>
+<div>
+  <button id="checkRulesBtn" onclick="checkRules()">Check Rules</button>
+</div>
+<div>
+  <button id="compareRulesBtn" onclick="compareRules()">Compare Old And New Rules</button>
+</div>
+<div>
+  <button onclick="quit()">Quit</button>
+</div>
+</body>
+</html>
+
