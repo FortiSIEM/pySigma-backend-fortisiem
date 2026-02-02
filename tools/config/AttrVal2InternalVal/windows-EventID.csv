@@ -31,6 +31,7 @@ Windows,"PowerShell,powershell-classic",Win-PowerShell
 Windows,Security,Win-Security
 4768,"Win-Security-4768-success,Win-Security-4768-failure"
 4769,"Win-Security-4769-failure,Win-Security-4769-success"
+4776,"Win-Security-4776-success,Win-Security-4776-failure"
 ######
 Windows,"App,application",Win-App
 #####

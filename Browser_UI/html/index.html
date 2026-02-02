@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sigma → FortiSIEM Rule Update</title>
+<script src="../js/util.js"></script>
+<script src="../js/websocket.js"></script>
+<script src="../js/indexAction.js" defer></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  label {
+    white-space: nowrap;
+    font-weight: bold;
+  }
+  input[type="text"] {
+    width: 500px;
+  }
+  select {
+    width: 200px;
+  }
+  button {
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .help-text {
+    font-size: 12px;  
+    color: #666;          
+    margin-left: 60px;    
+    line-height: 1.4;      
+  }
+
+  .help-text b {
+    font-weight: 600;     
+    color: #333;
+  }
+  .row {
+    margin-bottom: 12px;
+  }
+  .section {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-top: 20px;
+  }
+  .hidden {
+    display: none;
+  }
+
+  .editor {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 10px;
+    overflow: auto;
+    font-family: monospace;
+    white-space: pre-wrap;
+  }
+  .del { background: #fbb; }
+  .add { background: #bfb; }
+
+  .rule-file-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .rule-file-input {
+    flex: 1;
+    padding: 4px 6px;
+  }
+
+
+</style>
+</head>
+
+<body>
+
+<h2>Sigma → FortiSIEM Rule Update</h2>
+
+<div class="section">
+  <h3>Source</h3>
+
+  <div class="rule-file-row">
+    <label >Sigma clone URL:</label>
+    <input type="text" id="cloneUrl" class="rule-file-input"
+      value="https://github.com/SigmaHQ/sigma.git">
+  </div>
+
+  <div class="rule-file-row">
+    <label > Sigma Path:(Under sigma/)</label>
+    <input type="text" id="sigmaPath" value="rules/windows" class="rule-file-input">
+  </div>
+
+  <div class="rule-file-row">
+    <label >Updated to Commit ID:</label>
+    <input type="text" id="commitId" placeholder="Default: the latest commits" value="1df103ce6d90c53b39dae668721e0e3e70d29b02" class="rule-file-input">
+  </div>
+</div>
+
+<div class="section">
+  <h3>Action</h3>
+
+  <div class="rule-file-row" id="ruleText"></div>
+  <div class="rule-file-row">
+    <label for="oldRuleFile">Rule XML File Path:</label>
+    <input list="ruleFileList" id="oldRuleFile" name="oldRuleFile" class="rule-file-input" placeholder="Input or select one"/>
+    <datalist id="ruleFileList">
+   </datalist>
+
+    <button type="button"  onclick="openFileChooser()">Select File</button>
+    <button type="button"  onclick="clearSelectedFile()">Clear</button>
+    <input type="file" id="selectedRuleXml" accept=".xml" style="display:none" onchange="onRuleXmlChange()">
+   </div>
+
+   <div class="rule-file-row" id="oldCommitIdRow" class="row hidden">
+      <label> Rule File is Generated From Sigma Commit ID:</label>
+      <input type="text" id="oldCommitId" placeholder="" class="rule-file-input">
+   </div>
+
+   <div class="rule-file-row">
+    <label >The Rule Id of New Rule Start from Index: </label>
+    <input type="text" id="newRuleStart" value="1" class="rule-file-input">
+  </div>
+
+  <div id="updateActionRow" class="row">
+    <label>Update Action:</label>
+    <select id="updateAction">
+      <option>Update</option>
+      <option>OnlyExclude</option>
+      <option>OnlyUpdateLink</option>
+      <option>FullUpdate</option>
+    </select>
+    <div class="help-text">
+     <div></div>
+      <div><b>    Update</b>: It only updates rules when the rule is found in the rule file</div>
+      <div><b>    OnlyExclude</b>: Only output rules when the rule is not in the rule file</div>
+      <div><b>    OnlyUpdateLink</b>: Only update the file link in rules in the rule file</div>
+      <div><b>    FullUpdate</b>: Delete, update and add rules in the rule file</div>
+    </div>
+
+  </div>
+
+  <button type="button" id="updateButton" onclick="startUpdate()">Update</button>
+
+ </div>
+
+<div class="section" id="ResultPanel">
+  <h3>Result</h3>
+  <div class="rule-file-row">
+    <label >New Rule File Name: </label>
+     <input list="ruleFileList" id="ruleFileName" name="ruleFileName" class="rule-file-input" placeholder="Input or select one"/>
+
+  </div>
+
+  <div class="rule-file-row">
+    <label >Converted Failed Status File Name: </label>
+    <input list="ruleFileList" id="errorRuleStatusFileName" name="errorRuleStatusFileName" class="rule-file-input" placeholder="Input or select one"/>
+  </div>
+
+  <button id="downloadBtn" onclick="downloadRule()">Download New Rule XML</button>
+  <button id="showInBrowserBtn" onclick="showInBrowser()">Show New Rules In Browser</button>
+  <button id="checkRulesBtn"  onclick="checkRules()">Check New Rules</button>
+  <button id="viewErrBtn" onclick="showErrRules()">View Error Status</button>
+  <button id="compareRulesBtn" onclick="compareRules()">Compare Old And New  Rules</button>
+
+
+<pre id="log"></pre>
+
+</div>
+
+</div>
+  <button onclick="quit()">Quit</button>
+</div>
+
+<script>
+   window.onload = function() {
+      onRuleXmlChange();
+      getRuleFileList();
+   };
+</script>
+
+</body>
+</html>
+

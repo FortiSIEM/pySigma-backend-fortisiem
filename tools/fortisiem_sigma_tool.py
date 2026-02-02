@@ -18,6 +18,7 @@ sigma_path = os.getcwd()
 sys.path.insert(0, sigma_path)
 from tools.output import outputRules,generateErrRule,getEventTypeCsv,getDeletedRulesBetweenTwoFiles
 from tools.updateRule import addNewRule, loadRulesXML, RULE_STATUS
+from tools.util import getRuleId, getFilesListFromInputDir, getFilesListFromInputFile,loadYml
 import codecs
 
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
@@ -43,62 +44,6 @@ How to deal with the YAML file.
     argparser.add_argument("--forGui",action='store_true', help="The XML format can be imported into FortiSIEM by GUI")
     return argparser
 
-def getRuleId(rulesDicts, filePath, ruleType, ruleIndex):
-    fileName = filePath.split("/")[-1]
-    if len(rulesDicts) != 0:
-        if fileName in rulesDicts["ruleName"].keys():
-            return rulesDicts["ruleName"][fileName][0].get("id")
-     
-    if ruleIndex is None:
-       ruleIndex = 1
-
-    if ruleType is None:
-        ruleId = "PH_Rule_SIGMA_%d" % (ruleIndex)
-    else:
-        ruleId = "PH_Rule_%s_SIGMA_%d" % (ruleType, ruleIndex)
-    return ruleId
-
-def getFilesListFromInputDir(filedir):
-    tmp= []
-    filelist = []
-    for root, dirs, files in os.walk(filedir):
-        for file in files:
-            filelist.append(os.path.join(root, file))
-
-    for name in filelist:
-        if name.endswith(".yml"):
-            tmp.append(name)
-    return tmp 
-
-def getFilesListFromInputFile(fileName):
-    filelist = []
-    with open(fileName, newline='') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=',')
-            for row in spamreader:
-                if len(row) > 1:
-                     if row[1] == "Deleted":
-                         continue;
-                     filelist.append(row[0])
-                     
-                elif len(row) > 0:
-                    filelist.append(row[0])
-
-    return filelist
-
-def loadYml(file_path):
-    try:
-        with open(file_path, 'r') as file:
-            file_content = file.read()
-    except FileNotFoundError:
-        print(f"The file '{file_path}' was not found.")
-        return None
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-        return None
-    ymlRule = SigmaCollection.from_yaml(file_content);
-    return ymlRule; 
-
-
 def main():
     argparser = set_argparser()
     cmdargs = argparser.parse_args()
@@ -108,6 +53,7 @@ def main():
         exit(-1)
 
     outFile = cmdargs.output
+    errFile = "YML_Converted_Failed.xml"
     #to Csv
     if cmdargs.action == "RuleToCsv":
        if cmdargs.inputs is None:
@@ -195,7 +141,7 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
             print("--ruleFile/-r can't be empty. It's a rule file which needs to be updated.")
             sys.exit(-1)
         rulesDicts = loadRulesXML(cmdargs.ruleFile, sigmaFileList);
-        outputRules(rulesDicts, outFile, [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.MODIFIED]);
+        outputRules(rulesDicts, outFile, errFile, [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.MODIFIED]);
         sys.exit(0)
     elif cmdargs.action == "FullUpdate":
         if cmdargs.ruleFile is None:
@@ -246,7 +192,8 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
                    print("Skip to generate rule for YAML %s:\n" % (sigmaFile), file=sys.stderr)
                    continue
 
-               processing_pipeline = fortisiem_pipeline(config, rule)
+               otherParam = {"sigmaFile": sigmaFile}
+               processing_pipeline = fortisiem_pipeline(config, rule, otherParam)
                backend = FortisemBackend(processing_pipeline=processing_pipeline)
                
                logsource = rule.logsource
@@ -279,11 +226,11 @@ or one YAML file name. Input one with --ymlFile/-f.""", file=sys.stderr)
   
     #Output rules
     if cmdargs.action == "Update":
-        outputRules(rulesDicts, outFile, [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.DELETE, RULE_STATUS.MODIFIED])
+        outputRules(rulesDicts, outFile, errFile, [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.DELETE, RULE_STATUS.MODIFIED])
     elif cmdargs.action == "FullUpdate":
-        outputRules(rulesDicts, outFile, [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.DELETE, RULE_STATUS.MODIFIED, RULE_STATUS.NEW])
+        outputRules(rulesDicts, outFile, errFile, [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.DELETE, RULE_STATUS.MODIFIED, RULE_STATUS.NEW])
     else:
-        outputRules(rulesDicts, outFile, [RULE_STATUS.NEW])
+        outputRules(rulesDicts, outFile, errFile, [RULE_STATUS.NEW])
 
     sys.exit(error)
 

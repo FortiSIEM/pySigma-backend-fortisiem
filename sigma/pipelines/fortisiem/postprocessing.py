@@ -26,7 +26,7 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
     ) -> str:
         super().apply(pipeline, rule, query)
         try:
-            result = self.formatExpression(query, False, False)
+            result, mainToken = self.formatExpression(query, False, False)
             if not result:
                 error = f"Query foramt is not right. query: {query}"
                 raise NotImplementedError(error)
@@ -70,7 +70,7 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
                 count = count - 1;
                 if count == 0:
                     remainStr = conditionStr[ nextIndex + 1:]
-                    parenSubContition = self.formatExpression(conditionStr[1:nextIndex], fullExpressionIsNot, True)
+                    parenSubContition, subRuleToken = self.formatExpression(conditionStr[1:nextIndex], fullExpressionIsNot, True)
                     break
 
             nextIndex = nextIndex + 1
@@ -80,16 +80,18 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
             raise NotImplementedError(error)
 
 
-        return remainStr, parenSubContition
+        return remainStr, parenSubContition, subRuleToken
                    
 
     def formatExpression(self, conditionStr, fullExpressionIsNot = False, needParentheses = False):
         remainStr = str(conditionStr).strip(" ");
         if remainStr.startswith("AND") or remainStr.startswith("OR"):
-           return None
+           return None, None
         
         newRuleCondition = None
         countFilter = 0;
+        mainExpressionToken = "";
+        subRuleConditionList = {}
         while remainStr != "":
            token = ""
            countFilter += 1
@@ -120,37 +122,66 @@ class QueryToFortisiemExpressionTransformation(QueryPostprocessingTransformation
                if token == "AND":
                   token = "OR"
                elif token == "OR":
-                   token == "AND"
+                   token = "AND"
+
+
+           if token != "":
+               if mainExpressionToken != "" and mainExpressionToken != token:
+                   error = "AND and  OR in same leave in one condition."
+                   raise NotImplementedError(error)
+
+               mainExpressionToken = token;
 
            if remainStr[0] == '(':
-                remainStr, subRuleCondition = self.formatParenthesesExpression(remainStr, partConditionIsNot)
+                remainStr, subRuleCondition, subRuleToken = self.formatParenthesesExpression(remainStr, partConditionIsNot)
                 remainStr = remainStr.strip(" ")
                 if subRuleCondition is None:
                     break;
                 
-                if newRuleCondition or remainStr:
+                subRuleConditionList[subRuleCondition] = subRuleToken;
+                '''                
+                if ( newRuleCondition or remainStr ) and subRuleToken:
                     subRuleCondition = f"({subRuleCondition})"
 
                 if newRuleCondition is None:
                     newRuleCondition = subRuleCondition
                 else: 
                     newRuleCondition = newRuleCondition + " " + token + " " + subRuleCondition 
+                '''
            else:
                 oneCond, remainStr= self.getFilter(remainStr)
                 subRuleCondition = self.getAttOpVal(oneCond, partConditionIsNot)
                 if subRuleCondition is None:
                     break
+                subRuleConditionList[subRuleCondition] = "";
 
+                '''
                 if newRuleCondition is None:
                     newRuleCondition = subRuleCondition
                 else:
                     newRuleCondition = newRuleCondition + " " + token + " " + subRuleCondition
+                '''
+        if mainExpressionToken == "" and len(subRuleConditionList) > 1:
+            error = "Wrong condition format."               
+            raise NotImplementedError(error)
 
+        if len(subRuleConditionList) == 1:
+            newRuleCondition, mainExpressionToken = next(iter(subRuleConditionList.items()))
+        else: 
+            # mainExpressionToken should not be empty
+            for subRuleCondition, subRuleToken in subRuleConditionList.items():
+                if subRuleToken != '' and subRuleToken != mainExpressionToken:
+                     subRuleCondition = f"({subRuleCondition})"
+
+                if newRuleCondition is None:
+                     newRuleCondition = subRuleCondition
+                else:
+                     newRuleCondition = newRuleCondition + " " + mainExpressionToken + " " + subRuleCondition
 
         if newRuleCondition is None:
-            return None
+            return None, mainExpressionToken
         else:
-            return newRuleCondition.strip(" ")
+            return newRuleCondition.strip(" "), mainExpressionToken
 
     def getFilter(self, conditionStr):
        x = re.split(" (?:AND|OR) ", conditionStr)

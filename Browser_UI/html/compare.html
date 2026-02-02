@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FortiSIEM Rule comapre</title>
+<script src="../js/util.js"></script>
+<script src="../js/compareAction.js" defer></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  label {
+    white-space: nowrap;
+    font-weight: bold;
+  }
+  input[type="text"] {
+    width: 500px;
+  }
+  select {
+    width: 200px;
+  }
+  button {
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .help-text {
+    font-size: 12px;  
+    color: #666;          
+    margin-left: 60px;    
+    line-height: 1.4;      
+  }
+
+  .help-text b {
+    font-weight: 600;     
+    color: #333;
+  }
+  .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+  }
+  .row label {
+        font-weight: bold;
+        white-space: nowrap;
+  }
+  .row pre {
+        margin: 0;
+        background: #f5f5f5;
+        padding: 4px 8px;
+        border: 1px solid #ddd;
+        flex: 1;            /
+        white-space: pre-wrap;
+  }
+  .section {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-top: 20px;
+  }
+  .hidden {
+    display: none;
+  }
+  #resultTableContainer {
+    width: 100%;
+    max-height: 600px;   
+    overflow-y: auto;   
+    border: 1px solid #ccc; 
+  }
+
+  #resultTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;  
+  }
+
+  #resultTable th, #resultTable td {
+    border: 1px solid #ccc;
+    padding: 5px;
+    word-wrap: break-word; 
+    overflow-wrap: break-word;
+  }
+
+ #resultTable th {
+    background-color: #f2f2f2;
+    text-align: left;
+  }
+
+  #resultTable td {
+    vertical-align: top; 
+  }
+
+  .comapreContainer {
+    display: flex;
+    gap: 10px;
+    height: 500px;
+  }
+  .editor {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 10px;
+    overflow: auto;
+    font-family: monospace;
+    white-space: pre-wrap;
+  }
+  .del { background: #fbb; }
+  .add { background: #bfb; }
+
+  .rule-file-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .rule-file-input {
+    flex: 1;
+    padding: 4px 6px;
+  }
+
+
+</style>
+</head>
+
+<body>
+
+<h2>FortiSIEM Rule Compaer</h2>
+<div class="row">
+     <label>Old Rule File Name:</label>
+     <pre id="oldRuleFile"></pre>
+</div>
+<div class="row">
+     <label>New Rule File Name:</label>
+     <pre id="newRuleFile"></pre>
+</div>
+
+<pre id="log"></pre>
+<pre id="info"></pre>
+<div class="row">
+  <button id="clearTableBtn" type="button" onclick="clearTable()">Clear Table</button>
+  <button id="refreshTableBtn" type="button" onclick="refreshTable()">Refresh Table</button>
+</div>
+
+<div id="resultTableContainer">
+    <h3>Conversion Errors</h3>
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th scope="col">Sigma File</th>
+          <th scope="col">Error Message</th>
+          <th scope="col">SingleEvtConstr</th>
+        </tr>
+      </thead>
+      <tbody id="resultTableBody"></tbody>
+      </table>
+</div>
+
+</div>
+  <button onclick="quit()">Close</button>
+</div>
+</body>
+<script>
+
+</script>
+</html>
+

@@ -5,6 +5,7 @@ import yaml
 import re
 import copy
 import os
+import json
 from pathlib import Path
 from sigma.rule import SigmaDetection, SigmaRule
 from sigma.types import SigmaString,SpecialChars
@@ -36,7 +37,7 @@ class FortisiemConfig:
                         self.logsource_Condition_map[row[0]] = {}
                     self.logsource_Condition_map[row[0]][row[1]] = {"eventType": row[2]}
 
-    def getFilesListFromDir(self, filedir):
+    def getFilesListFromDir(self, filedir, endsWith=".csv"):
         tmp= []
         filelist = []
         for root, dirs, files in os.walk(filedir):
@@ -44,7 +45,7 @@ class FortisiemConfig:
                 filelist.append(os.path.join(root, file))
 
         for name in filelist:
-            if name.endswith(".csv"):
+            if name.endswith(endsWith):
                tmp.append(name)
         return tmp
 
@@ -74,23 +75,23 @@ class FortisiemConfig:
 
 
     def loadFieldNameToFortiSIEMAttrNameMap(self, attrFolder):
-        csvFiles = self.getFilesListFromDir(attrFolder);
+        jsonFiles = self.getFilesListFromDir(attrFolder, ".json");
+        for fullFilePath in jsonFiles: 
+            with open(fullFilePath, 'r', encoding='utf-8') as f:
+                product = Path(fullFilePath).stem.lower()
+                if product == 'attrtype':
+                    self.fortisiem_attr_type_dict = json.load(f)
+                else:
+                    self.fortisiem_attrs_dict[product] = json.load(f)
 
-        for csvFullFilePath in csvFiles: 
-            with open(csvFullFilePath, newline='') as csvfile:
-                 product = Path(csvFullFilePath).stem.lower()
-                 spamreader = csv.reader(csvfile, delimiter=',')
-                 attrs_dict = {}
-                 for row in spamreader:
-                     if len(row) < 2:
-                        continue;
-                     elif len(row) == 2:
-                        self.fortisiem_attr_type_dict[row[1].strip(" ")] = "string"
-                     else:
-                        self.fortisiem_attr_type_dict[row[1].strip(" ")] = row[2]
-                     attrs_dict[row[0]] = row[1].strip(" ")
-
-                 self.fortisiem_attrs_dict[product] = attrs_dict
+        '''
+        print("=======")
+        json_string = json.dumps(self.fortisiem_attrs_dict, indent=2)
+        print(json_string)
+        print("=======")
+        json_string = json.dumps(self.fortisiem_attr_type_dict, indent=2)
+        print(json_string)
+        '''
 
     def getFortiSIEMAttrDict(self, product, service):
         tmp = self.fortisiem_attrs_dict.get(product.lower(), {})

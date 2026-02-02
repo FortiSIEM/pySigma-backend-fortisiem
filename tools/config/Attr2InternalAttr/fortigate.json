@@ -1,0 +1,8 @@
+{
+  "action": {
+    "default": "fwAction"
+  },
+  "cfgpath": {
+    "default": "objectPath"
+  }
+}

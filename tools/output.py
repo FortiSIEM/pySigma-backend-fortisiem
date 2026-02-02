@@ -37,14 +37,13 @@ def statusToStr(status):
         return status.name
 
 
-def outputRules(rulesDicts, outFile, status):
+def outputRules(rulesDicts, outFile, errFile, status):
     if outFile is None:
         return
 
     if status is None:
         status = [RULE_STATUS.NOCHANGE, RULE_STATUS.ONLYLINK, RULE_STATUS.DELETE, RULE_STATUS.MODIFIED]
 
-    errFile = "Converted_Failed.xml"
     try:
         out = open(outFile, "w", encoding='utf-8')
         errOut = open(errFile, "w", encoding='utf-8')
@@ -58,6 +57,7 @@ def outputRules(rulesDicts, outFile, status):
     errCount = 0;
     totalCount = 0
     print("<Rules>", file=out)
+    print("<Rules>", file=errOut)
     for item in rulesDicts["ruleName"].values():
         if item[1] not in status:
             continue
@@ -83,14 +83,16 @@ def outputRules(rulesDicts, outFile, status):
         countMap[item[1]] = countMap[item[1]] + 1
 
     print("</Rules>", file=out)
+    print("</Rules>", file=errOut)
     out.close()
+    errOut.close()
     for s in countMap.keys():
         print("%s Rules %d" % (statusToStr(s), countMap[s]))
     
     print("Rules Converted Successed %d" % totalCount)
     print("Rules Converted Failed %d" % errCount)
     if errCount != 0:
-        print("    Error rules is in Converted_Failed.xml")
+        print(f"    Error rules is in {errFile}")
 
 
 def toCsvString(orgStr):

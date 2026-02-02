@@ -1,0 +1,4 @@
+python3 backend/app.py &>/dev/null &
+cd www/html
+python3 -m http.server 8888 &>/dev/null &
+

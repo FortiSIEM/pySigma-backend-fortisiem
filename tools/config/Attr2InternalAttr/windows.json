@@ -1,0 +1,859 @@
+{
+  "DistinguishedName": {
+    "default": "resourceName"
+  },
+  "TargetDetails": {
+    "default": "details"
+  },
+  "Account_Name": {
+    "default": "user"
+  },
+  "Computer_Name": {
+    "default": "computer"
+  },
+  "Originating_Computer": {
+    "default": "srcName"
+  },
+  "FileHash": {
+    "default": "hashCode"
+  },
+  "FilePath": {
+    "default": "filePath"
+  },
+  "Fqbn": {
+    "default": "hostName"
+  },
+  "RuleId": {
+    "default": "ruleId"
+  },
+  "RuleName": {
+    "default": "ruleName"
+  },
+  "CallTrace": {
+    "default": "procPath"
+  },
+  "IntegrityLevel": {
+    "default": "integrityLevel"
+  },
+  "ParentIntegrityLevel": {
+    "default": "procTrustLevel"
+  },
+  "Company": {
+    "default": "company"
+  },
+  "ParentProcessGuid": {
+    "default": "procOwner"
+  },
+  "LogonGuid": {
+    "default": "uuid"
+  },
+  "ParentUser": {
+    "default": "userGrp"
+  },
+  "Hashes": {
+    "default": "hashCode"
+  },
+  "Hash": {
+    "default": "hashCode"
+  },
+  "Imphash": {
+    "default": "hashIMP"
+  },
+  "OriginalFilename": {
+    "default": "srcFileName"
+  },
+  "OriginalFileName": {
+    "default": "srcFileName"
+  },
+  "SourceFilename": {
+    "default": "srcFileName"
+  },
+  "ParentProcess": {
+    "default": "parentProcName"
+  },
+  "Product": {
+    "default": "product"
+  },
+  "sha1": {
+    "default": "hashSHA1"
+  },
+  "DestPort": {
+    "default": "destIpPort"
+  },
+  "Destination": {
+    "default": "destIpAddr"
+  },
+  "destination.port": {
+    "default": "destIpPort"
+  },
+  "HostApplication": {
+    "default": "appName"
+  },
+  "TargetName": {
+    "default": "targetName"
+  },
+  "TargetProcessAddress": {
+    "default": "destMACAddr"
+  },
+  "Service": {
+    "default": "serviceName"
+  },
+  "Source": {
+    "default": "eventSource"
+  },
+  "SourceName": {
+    "default": "eventSource"
+  },
+  "Feature_Name": {
+    "default": "feature"
+  },
+  "Reason": {
+    "default": "reason"
+  },
+  "ImagePath": {
+    "default": "serviceFileName"
+  },
+  "Path": {
+    "default": "procPath"
+  },
+  "Payload": {
+    "default": "dataPayload"
+  },
+  "Properties": {
+    "default": "propName"
+  },
+  "QueryName": {
+    "default": "queryId"
+  },
+  "QueryResults": {
+    "default": "actionResult"
+  },
+  "QueryStatus": {
+    "default": "status"
+  },
+  "LogonProcessName": {
+    "default": "winLogonProc"
+  },
+  "ServicePrincipalNames": {
+    "default": "principal"
+  },
+  "HostVersion": {
+    "default": "version"
+  },
+  "FailureCode": {
+    "default": "winKerbFailCode"
+  },
+  "EngineVersion": {
+    "default": "version"
+  },
+  "DeviceClassName": {
+    "default": "deviceType"
+  },
+  "DeviceDescription": {
+    "default": "description"
+  },
+  "Status": {
+    "default": "winLogonFailCode2",
+    "rules/windows/builtin/security/win_security_susp_kerberos_manipulation.yml":"winKerbFailCode"
+  },
+  "AccessList": {
+    "default": "osObjAccessType",
+    "rules/windows/builtin/security/win_security_susp_lsass_dump_generic.yml":"fileAccess"
+  },
+  "AccessMask": {
+    "default": "fileAccess"
+  },
+  "AttributeLDAPDisplayName": {
+    "default": "propName"
+  },
+  "ContextInfo": {
+    "default": "lineContent"
+  },
+  "AttributeValue": {
+    "default": "propValue"
+  },
+  "GroupSid": {
+    "default": "groupID"
+  },
+  "AuditPolicyChanges": {
+    "default": "actionName"
+  },
+  "CallingProcessName": {
+    "default": "procName"
+  },
+  "GrantedAccess": {
+    "default": "accessKeyId"
+  },
+  "KeyLength": {
+    "default": "msgLen"
+  },
+  "keywords": {
+    "default": "msg"
+  },
+  "Keywords": {
+    "default": "msg"
+  },
+  "LayerRTID": {
+    "default": "permissionLevelID"
+  },
+  "Level": {
+    "default": "permissionLevelType"
+  },
+  "LDAPDisplayName": {
+    "default": "propName"
+  },
+  "Value": {
+    "default": "propValue"
+  },
+  "ObjectClass": {
+    "default": "osObjType"
+  },
+  "ObjectServer": {
+    "default": "serverName"
+  },
+  "ObjectValueName": {
+    "default": "osObjValue"
+  },
+  "PipeName": {
+    "default": "vpnTunnelName"
+  },
+  "PrivilegeList": {
+    "default": "privName"
+  },
+  "RelativeTargetName": {
+    "default": "targetName"
+  },
+  "SAMAccountName": {
+    "default": "accountName"
+  },
+  "ScriptBlockText": {
+    "default": "script"
+  },
+  "ShareName": {
+    "default": "fileName"
+  },
+  "SidHistory": {
+    "default": "essId"
+  },
+  "Signed": {
+    "default": "authResult"
+  },
+  "StartFunction": {
+    "default": "funName"
+  },
+  "StartModule": {
+    "default": "module"
+  },
+  "TicketEncryptionType": {
+    "default": "encryptAlgo"
+  },
+  "TicketOptions": {
+    "default": "kerbTicketOption"
+  },
+  "IpAddress": {
+    "default": "srcIpAddr"
+  },
+  "HiveName": {
+    "default": "procName"
+  },
+  "DestinationIsIpv6": {
+    "default": "isIpv6"
+  },
+  "AllowedToDelegateTo": {
+    "default": "_win_isAllowedToDelegateTo_removed"
+  },
+  "CallerProcessName": {
+    "default": "procName"
+  },
+  "Caption": {
+    "default": "description"
+  },
+  "CertThumbprint": {
+    "default": "certInfo"
+  },
+  "ClassName": {
+    "default": "deviceType"
+  },
+  "ModifyingApplication": {
+    "default": "appName"
+  },
+  "OldTargetUserName": {
+    "default": "oldTargetUser"
+  },
+  "ommandLine": {
+    "default": "command"
+  },
+  "OriginalName": {
+    "default": "originalProcName"
+  },
+  "Provider_Name": {
+    "default": "_win_providerName_removed"
+  },
+  "param1": {
+    "default": "paraName"
+  },
+  "param2": {
+    "default": "otherParaName"
+  },
+  "RemoteAddress": {
+    "default": "remoteAddress"
+  },
+  "SamAccountName": {
+    "default": "targetUser"
+  },
+  "TargetUserSid": {
+    "default": "userId"
+  },
+  "TargetSid": {
+    "default": "groupID"
+  },
+  "TemplateContent": {
+    "default": "templateContent"
+  },
+  "NewTemplateContent": {
+    "default": "newTemplateContent"
+  },
+  "NewTargetUserName": {
+    "default": "targetUser"
+  },
+  "RemoteName": {
+    "default": "targetName"
+  },
+  "LocalName": {
+    "default": "filePath"
+  },
+  "processPath": {
+    "default": "procName"
+  },
+  "Action": {
+    "default": "eventAction"
+  },
+  "ApplicationPath": {
+    "default": "procPath"
+  },
+  "SearchFilter": {
+    "default": "queryFilter"
+  },
+  "Address": {
+    "default": "remoteAddress"
+  },
+  "Origin": {
+    "default": "origLocation"
+  },
+  "PasswordLastSet": {
+    "default": "passwordLastSet"
+  },
+  "TargetServerName": {
+    "default": "targetName"
+  },
+  "ServerName": {
+    "default": "serverName"
+  },
+  "DeviceName": {
+    "default": "hostName"
+  },
+  "AuditSourceName": {
+    "default": "resourceName"
+  },
+  "TargetLogonId": {
+    "default": "winLogonId"
+  },
+  "PreAuthType": {
+    "default": "authenMethod"
+  },
+  "IsatapRouter": {
+    "default": "router"
+  },
+  "IpPort": {
+    "default": "ipPort"
+  },
+  "SigningUsed": {
+    "default": "signingUsed"
+  },
+  "EncyptionUsed": {
+    "default": "encyptionUsed"
+  },
+  "AdditionalInfo": {
+    "default": "details"
+  },
+  "SubStatus": {
+    "default": "subStatus"
+  },
+  "ComputerName": {
+    "default": "computer"
+  },
+  "CurrentDirectory": {
+    "default": "dirName"
+  },
+  "Description": {
+    "default": "description"
+  },
+  "FileVersion": {
+    "default": "fileVersion"
+  },
+  "GroupName": {
+    "default": "targetUserGrp"
+  },
+  "LogonId": {
+    "default": "winLogonId"
+  },
+  "NewName": {
+    "default": "newObjValue"
+  },
+  "ProcessName": {
+    "default": "procName"
+  },
+  "QNAME": {
+    "default": "destName"
+  },
+  "TargetFilename": {
+    "default": "fileName"
+  },
+  "User": {
+    "default": "user"
+  },
+  "SourceUser": {
+    "default": "user"
+  },
+  "Image": {
+    "default": "procName"
+  },
+  "ParentImage": {
+    "default": "parentProcName"
+  },
+  "SourceParentImage": {
+    "default": "srcParentProcName"
+  },
+  "TargetParentProcessId": {
+    "default": "targetParentProcId"
+  },
+  "StartAddress": {
+    "default": "startAddress"
+  },
+  "FilterName": {
+    "default": "filter"
+  },
+  "SubcategoryGuid": {
+    "default": "uuid"
+  },
+  "OldUacValue": {
+    "default": "oldRegValue"
+  },
+  "OldValue": {
+    "default": "oldRegValue"
+  },
+  "NewUacValue": {
+    "default": "newRegValue"
+  },
+  "Provider": {
+    "default": "providerName"
+  },
+  "PossibleCause": {
+    "default": "reason"
+  },
+  "CommandLine": {
+    "default": "command"
+  },
+  "TaskName": {
+    "default": "task"
+  },
+  "ServiceName": {
+    "default": "serviceName"
+  },
+  "TargetObject": {
+    "default": "regKeyPath"
+  },
+  "EventType": {
+    "default": "osObjAction"
+  },
+  "EventID": {
+    "default": "eventType"
+  },
+  "EventCode": {
+    "default": "eventType"
+  },
+  "Details": {
+    "default": "details"
+  },
+  "ParentCommandLine": {
+    "default": "parentCommand"
+  },
+  "Message": {
+    "default": "msg"
+  },
+  "HostName": {
+    "default": "hostName"
+  },
+  "FileName": {
+    "default": "fileName"
+  },
+  "TargetImage": {
+    "default": "targetProcName"
+  },
+  "Accesses": {
+    "default": "osObjAccessType"
+  },
+  "AccountName": {
+    "default": "user"
+  },
+  "DestinationIp": {
+    "default": "destIpAddr"
+  },
+  "DestinationPort": {
+    "default": "destIpPort"
+  },
+  "DestinationHostname": {
+    "default": "destName"
+  },
+  "DestinationAddress": {
+    "default": "destIpAddr"
+  },
+  "ObjectType": {
+    "default": "osObjType"
+  },
+  "ObjectName": {
+    "default": "osObjName"
+  },
+  "ObjectDN": {
+    "default": "objId"
+  },
+  "SourceImage": {
+    "default": "procName"
+  },
+  "SourceAddress": {
+    "default": "srcIpAddr"
+  },
+  "SourcePort": {
+    "default": "srcIpPort"
+  },
+  "SourceNetworkAddress": {
+    "default": "srcIpAddr"
+  },
+  "SourceWorkstation": {
+    "default": "srcName"
+  },
+  "TargetUserName": {
+    "default": "user"
+  },
+  "UserName": {
+    "default": "user"
+  },
+  "SubjectDomainName": {
+    "default": "domain"
+  },
+  "SubjectLogonId": {
+    "default": "winLogonId"
+  },
+  "SubjectUserName": {
+    "default": "user"
+  },
+  "SubjectUserSid": {
+    "default": "securityId"
+  },
+  "Workstation": {
+    "default": "computer"
+  },
+  "WorkstationName": {
+    "default": "computer"
+  },
+  "ServiceFileName": {
+    "default": "serviceFileName"
+  },
+  "Signature": {
+    "default": "signatureName"
+  },
+  "ImageLoaded": {
+    "default": "loadedProcName"
+  },
+  "LogonType": {
+    "default": "winLogonType"
+  },
+  "AuthenticationPackage": {
+    "default": "procName"
+  },
+  "AuthenticationPackageName": {
+    "default": "authenMethod"
+  },
+  "Device": {
+    "default": "deviceIdentification"
+  },
+  "PolicyName": {
+    "default": "policyName"
+  },
+  "TargetProcessId": {
+    "default": "targetProcId"
+  },
+  "TargetUser": {
+    "default": "targetUser"
+  },
+  "NewValue": {
+    "default": "newObjValue"
+  },
+  "SubjectAccountName": {
+    "default": "user"
+  },
+  "ClientAddress": {
+    "default": "srcIpAddr"
+  },
+  "ProcessID": {
+    "default": "procId"
+  },
+  "TargetFileName": {
+    "default": "fileName"
+  },
+  "AccountDomain": {
+    "default": "domain"
+  },
+  "Computer": {
+    "default": "computer"
+  },
+  "DomainName": {
+    "default": "targetDomain"
+  },
+  "Initiated": {
+    "default": "initiated"
+  },
+  "Commandline": {
+    "default": "command"
+  },
+  "ProcessCommandLine": {
+    "default": "command"
+  },
+  "Channel": {
+    "default": "activityType"
+  },
+  "ServiceType": {
+    "default": "serviceType"
+  },
+  "ServiceStartType": {
+    "default": "serviceStartType"
+  },
+  "Configuration": {
+    "default": "configValue"
+  },
+  "dst_ip": {
+    "default": "destIpAddr"
+  },
+  "src_ip": {
+    "default": "srcIpAddr"
+  },
+  "dst_port": {
+    "default": "destIpPort"
+  },
+  "src_port": {
+    "default": "srcIpPort"
+  },
+  "dns_query": {
+    "default": "uriQuery"
+  },
+  "uri_query": {
+    "default": "uriQuery"
+  },
+  "parent_domain": {
+    "default": "domain"
+  },
+  "record_type": {
+    "default": "type"
+  },
+  "query": {
+    "default": "queryId"
+  },
+  "action": {
+    "default": "activityName"
+  },
+  "operation": {
+    "default": "opName"
+  },
+  "c-useragent": {
+    "default": "httpUserAgent"
+  },
+  "c-uri": {
+    "default": "httpEndUri"
+  },
+  "endpoint": {
+    "default": "targetName"
+  },
+  "service": {
+    "default": "serviceName"
+  },
+  "path": {
+    "default": "procPath"
+  },
+  "name": {
+    "default": "procName"
+  },
+  "cipher": {
+    "default": "password"
+  },
+  "request_type": {
+    "default": "type"
+  },
+  "answer": {
+    "default": "actionResult"
+  },
+  "resp_mime_types": {
+    "default": "type"
+  },
+  "message_size": {
+    "default": "msgLen"
+  },
+  "question_length": {
+    "default": "size"
+  },
+  "cs-method": {
+    "default": "httpMethod"
+  },
+  "sc-status": {
+    "default": "status"
+  },
+  "method": {
+    "default": "httpMethod"
+  },
+  "referer": {
+    "default": "httpReferrer"
+  },
+  "useragent": {
+    "default": "httpUserAgent"
+  },
+  "clientip": {
+    "default": "srcIpAddr"
+  },
+  "MachineName": {
+    "default": "hostName"
+  },
+  "TargetPort": {
+    "default": "destIpPort"
+  },
+  "DestAddress": {
+    "default": "destIpAddr"
+  },
+  "SourceIp": {
+    "default": "srcIpAddr"
+  },
+  "AppName": {
+    "default": "appName"
+  },
+  "Binary": {
+    "default": "code"
+  },
+  "ClientProcessId": {
+    "default": "procId"
+  },
+  "ParentProcessId": {
+    "default": "parentProcId"
+  },
+  "Data": {
+    "default": "lineContent"
+  },
+  "State": {
+    "default": "status"
+  },
+  "Type": {
+    "default": "type"
+  },
+  "Contents": {
+    "default": "lineContent"
+  },
+  "CreationUtcTime": {
+    "default": "createTime"
+  },
+  "Query": {
+    "default": "queryFilter"
+  },
+  "ProviderContextName": {
+    "default": "providerName"
+  },
+  "PreviousCreationUtcTime": {
+    "default": "preTime"
+  },
+  "ErrorCode": {
+    "default": "errorCode"
+  },
+  "FileNameBuffer": {
+    "default": "fileName"
+  },
+  "ProcessNameBuffer": {
+    "default": "procName"
+  },
+  "RequestedPolicy": {
+    "default": "policyIdentity"
+  },
+  "ValidatedPolicy": {
+    "default": "recipientPolicyId"
+  },
+  "FilterOrigin": {
+    "default": "filter"
+  },
+  "Application": {
+    "default": "appName"
+  },
+  "AppID": {
+    "default": "appName"
+  },
+  "ImageName": {
+    "default": "procName"
+  },
+  "ImpersonationLevel": {
+    "default": "permissionLevelID"
+  },
+  "Name": {
+    "default": "procName"
+  },
+  "PackageFullName": {
+    "default": "procName"
+  },
+  "PackagePath": {
+    "default": "procPath"
+  },
+  "ProcessId": {
+    "default": "procId"
+  },
+  "ProcessPath": {
+    "default": "procPath"
+  },
+  "Protocol": {
+    "default": "srcProto"
+  },
+  "SidList": {
+    "default": "userId"
+  },
+  "SourceCommandLine": {
+    "default": "command"
+  },
+  "SourceHostname": {
+    "default": "srcName"
+  },
+  "TargetOutboundUserName": {
+    "default": "user"
+  },
+  "TaskContent": {
+    "default": "task"
+  },
+  "TaskContentNew": {
+    "default": "task"
+  },
+  "md5": {
+    "default": "hashMD5"
+  },
+  "param3": {
+    "default": "swParam"
+  },
+  "process": {
+    "default": "procName"
+  },
+  "sha256": {
+    "default": "hashSHA256"
+  },
+  "subjectName": {
+    "default": "subjectContainsWords"
+  },
+  "ExceptionCode": {
+    "default": "errorCode"
+  },
+  "SignatureStatus": {
+    "default": "signatureStatus"
+  },
+  "payload": {
+    "default": "dataPayload"
+  }
+}

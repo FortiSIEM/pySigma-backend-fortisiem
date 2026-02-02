@@ -1,4 +1,4 @@
-from sigma.processing.transformations import DetectionItemTransformation
+from sigma.processing.transformations import DetectionItemTransformation, FieldMappingTransformation
 from sigma.pipelines.fortisiem.config import FortisiemConfig
 from typing import Any, Iterable, List, Dict, Optional, Set, Union, Pattern, Iterator,ClassVar 
 from sigma.rule import SigmaDetection, SigmaDetectionItem
@@ -7,6 +7,34 @@ from sigma.types import (
     SigmaRegularExpression,
 )
 import string
+from dataclasses import dataclass, InitVar, field
+
+@dataclass
+class FortisiemFieldMappingTransformation(FieldMappingTransformation):
+    mapping: Dict[str, Union[str, List[str]]]
+    extra_config: Optional[Dict] = None
+    sigmaFile: str = None
+
+    def __post_init__(self):
+        if self.extra_config is not None:
+            self.sigmaFile = self.extra_config.get("sigmaFile", None)
+
+    def get_mapping(self, field: str) -> Union[None, str, List[str]]:
+        if field not in self.mapping:
+            return;
+
+        mappings = self.mapping[field]
+        if mappings is None:
+            return;
+
+        newAttr = mappings.get("default", None)
+        if self.sigmaFile is not None:
+           mapping = mappings.get(self.sigmaFile, None)
+           if mapping is not None:
+               newAttr = mapping
+               print(f"XXXX{self.sigmaFile}: {field}---> {newAttr}")
+        if newAttr is not None:
+               return newAttr
 
 class FortisiemReplaceDetectionItemTransformation(DetectionItemTransformation):
     """Deletes detection items. This should only used in combination with a detection item

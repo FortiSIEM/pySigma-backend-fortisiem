@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<script src="../js/util.js"></script>
+<script src="../js/checkAction.js" defer></script>
+<head>
+    <title>Compare Constraint</title>
+    <style>
+     .row {
+    	display: flex;
+    	align-items: center;
+    	gap: 10px;
+    	margin-bottom: 8px;
+    }
+    .row label {
+    	font-weight: bold;
+    	white-space: nowrap;
+     }
+     .row pre {
+    	margin: 0;
+    	background: #f5f5f5;
+    	padding: 4px 8px;
+    	border: 1px solid #ddd;
+        flex: 1;            /
+        white-space: pre-wrap;
+     }
+     .container {
+        display: flex;
+        gap: 10px;
+        height: 500px;
+     }
+    .editor {
+    	flex: 1;
+    	border: 1px solid #ccc;
+    	padding: 10px;
+    	overflow: auto;
+    	font-family: monospace;
+    	white-space: pre-wrap;
+    }
+    #checkTableContainer {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+    }
+
+    #checkTable {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    #checkTable th, #resultTable td {
+        border: 1px solid #ccc;
+        padding: 5px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    #checkTable th {
+        background-color: #f2f2f2;
+        text-align: left;
+    }
+
+    #checkTable td {
+        vertical-align: top;
+    }
+
+    .sigma,
+    .forti {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: monospace;
+      vertical-align: top;
+    }
+   </style>
+</head>
+<body>
+   <div class="row" id="newRuleFileRow">
+     <label>Rule File Name:</label>
+     <pre id="RuleFile"></pre>
+   </div>
+   <div class="row" id="newRuleFileRow">
+     <label>Rule File Type:</label>
+     <pre id="RuleFileType"></pre>
+   </div>
+
+    <div class="row">
+      <button id="clearBtn", onclick="clearTable()">Clear Table</button>
+      <button id="refreshBtn", onclick="refresh()">Refresh Table</button>
+    </div>
+
+    <label style="font-weight: bold;">Sigma Rule VS FortiSIEM Rule</label>
+    <table border="1" width="100%" id=checkTable>
+       <thead>
+         <tr>
+           <th>Sigma Rule</th>
+           <th>FortiSIEM Rule (Editable)</th>
+         </tr>
+       </thead>
+      <tbody id="checkTableBody">
+      </tbody>
+    </table>
+
+    <pre id="log"></pre>
+
+     </table>
+    <div>
+    <button id="closeBtn", onclick="quit()">Close</button>
+    </div>
+</body>
+
+<script>
+
+</script>
+</html>

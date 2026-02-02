@@ -89,7 +89,7 @@ def loadRenameFileMap():
             spamreader = csv.reader(csvfile, delimiter=',')
             for row in spamreader:
                 if len(row) == 3:
-                    if row[0] == "FULLPATH":
+                    if row[0] == "FULL_FILE_NAME" or row[0] == "FULL_FILE_PATH":
                         if row[0] not in RenameFileMap.keys():
                             RenameFileMap[row[0]] = {}
                         RenameFileMap[row[0]][row[1]]=row[2];
@@ -107,12 +107,19 @@ def convertOldPath2NewPath(loadRenameFileMap, path, filelist):
     if fileName in filelist.keys():
         return filelist[fileName]
 
-    if "FULLPATH" in loadRenameFileMap.keys():
-        tmp = loadRenameFileMap["FULLPATH"]
+    if "FULL_FILE_PATH" in loadRenameFileMap.keys():
+        tmp = loadRenameFileMap["FULL_FILE_PATH"]
+        if path in tmp.keys():
+            print(f"{path}{tmp[path]}")
+            return tmp[path]
+
+    if "FULL_FILE_NAME" in loadRenameFileMap.keys():
+        tmp = loadRenameFileMap["FULL_FILE_NAME"]
         if attrs[-1] in tmp.keys():
             fileName = tmp[attrs[-1]]
             if fileName in filelist.keys():
                 return filelist[fileName]
+
 
     if folder in loadRenameFileMap.keys():
          tmp = loadRenameFileMap[folder]
@@ -281,7 +288,9 @@ def getParenthesesExpression(conditionStr):
             if conditionStr[nextIndex]== '"':
                 nextQuoteIndex = getQuoteStr(conditionStr[nextIndex:])
                 if not nextQuoteIndex:
-                    return remainStr, None
+                    error = "Quote doesn't match."
+                    raise NotImplementedError(error)
+                    #return remainStr, None, None
                 nextIndex = nextIndex + nextQuoteIndex
             elif conditionStr[nextIndex]== '(':
                 count = count + 1
@@ -326,7 +335,9 @@ def compareDict(oldDict, newDict):
     return eqCount == len(newDict[1])
 
 def formatAttrOpVal(oneCond):
-     part = re.split("(\s*=\s*|\s*!=\s*| CONTAIN | REGEXP | IN | IS | BETWEEN )", oneCond)
+     part = re.split("(\s*=\s*|\s*!=\s*| CONTAIN | REGEXP | IN | IS | BETWEEN\s*\()", oneCond)
+     part[0] = part[0].strip("(")
+
      attr = part[0].strip(" ")
      attr = re.sub(r"\s+NOT$", " NOT", attr)
 
@@ -354,19 +365,20 @@ def formatAttrOpVal(oneCond):
         val = "|".join(modified_vals)
         val = f"\"{val}\""
      elif op == "IN":
-         val = val[1:-1].strip(" ").strip("\"")
-         vals = re.split("\"\s*,\s*\"", val)
+         val = val[1:-1].strip(" ")
+         val = val[1:-1]#remove "
+         vals = re.split(r'"\s*,\s*"', val)
          vals = sorted(vals)
-         val =  "\",\"".join(vals)
-         val = f"(\"{val}\")"
+         val =  '","'.join(vals)
+         val = f'("{val}")'
      elif op == "BETWEEN":
          regex_pattern = r"\"\s*,\s*\""
          replacement = "\",\""
          val = re.sub(regex_pattern, replacement, val)
          val = re.sub(r"\(\s*", "(", val)
          val = re.sub(r"\s*\)", ")", val)
-     oneCond = f"{attr} {op} {val}"
-     return oneCond
+     #oneCond = f"{attr} {op} {val}"
+     return attr,op,val
 
 def generateDictFromExpression(conditionStr):
         remainStr = str(conditionStr).strip(" ");
@@ -383,7 +395,7 @@ def generateDictFromExpression(conditionStr):
                 if len(subFilterDict[1]) == 0:
                     continue;
                 elif len(subFilterDict[1]) == 1:
-                    currFilterList.append(subFilterDict[1][0])
+                    subFilterList.append(subFilterDict[1][0])
                     continue;
                 else:
                     subFilterList.append(subFilterDict)
@@ -395,21 +407,123 @@ def generateDictFromExpression(conditionStr):
                 remainStr = remainStr[3:]
             else: 
                 oneCond, remainStr = getFilter(remainStr)
-                oneCond = formatAttrOpVal(oneCond);
-                currFilterList.append(oneCond.strip(" "))
+                attr,op,val = formatAttrOpVal(oneCond);
+                oneCond = f"{attr} {op} {val}"
+                currFilterList.append(oneCond)
 
             remainStr = remainStr.strip(" ")
 
+        #Remove Redundant Parentheses
+        #token==""  means only one filter in this current constr
+        if  token == "" and (len(currFilterList) + len(subFilterList)) > 1: 
+            error = f"OR and AND is missing in {conditionStr}."
+            print(error)
+            raise NotImplementedError(error)
+             
+
         for item in subFilterList:
-            if token == item[0]:
+            if isinstance(item, str):
+                currFilterList.append(item);
+                continue;
+            elif token == "":#this means only one filter in this current constr
+                token, currFilterList = removeRedundantParentheses(item[0], item[1])
+                break;
+            elif item[0] == "":
+                subToken, subFilters = removeRedundantParentheses(item[0], item[1])
+                if subToken == "":
+                    currFilterList.append(subFilters);
+                else:
+                    if subToken == token:
+                        currFilterList = currFilterList + subFilters
+                    else:
+                        currFilterList.append((subToken, subFilters));
+                continue;
+            elif token == item[0]:
                 currFilterList = currFilterList + item[1]
             else:
                 currFilterList.append(item)
 
-        if len(currFilterList) == 0:
-               return None
-           
-        return (token, currFilterList)
+        token,currFilterList = mergeRegex(token, currFilterList);
+        return (token,currFilterList)
+
+def removeRedundantParentheses(token, currFilterList):
+        if token != "":
+            return (token, currFilterList);
+
+        if len(currFilterList) > 1:
+            error = f"OR and AND is missing between {currFilterList}"
+            print(error)
+            raise NotImplementedError(error)
+
+        subItem = currFilterList[0]
+        while isinstance(subItem, tuple):
+            if subItem[0] != "":  # subItem[0]=="" that means only one filter in this sub constr
+                break;
+            if len(subItem[1]) > 1:
+                error = f"OR and AND is missing between {subItem[1]}."
+                print(error)
+                raise NotImplementedError(error)
+            subItem = subItem[1][0]
+
+
+        if isinstance(subItem, str):
+            return (token, subItem);
+        else:
+            token = subItem[0];
+            currFilterList = subItem[1]
+            return (token, currFilterList)
+
+def mergeRegex(token, currFilterList):
+        #===================================
+        # Merge REGEX 
+        #{attr:[val1, val2]}
+        regConditon = {}
+        newFilterList = []
+        for item in currFilterList:
+            if isinstance(item, tuple):
+               newFilterList.append(item)
+               continue
+               
+            attr,op,val = formatAttrOpVal(item);
+            if op != "REGEXP":
+                newFilterList.append(item)
+                continue;
+
+            if attr not in regConditon.keys():
+                regConditon[attr] = []
+            regConditon[attr].append(val)
+
+        if len(regConditon) == 0:
+              return (token, currFilterList)
+
+        #print(f"token {token}")
+        #print(f"currFilterList {currFilterList}")
+        #print(f"newFilterList {newFilterList}")
+        #print(f"regConditon {regConditon}")
+        #print(f"token {token}")
+
+        for attr in regConditon.keys():
+               keys = regConditon[attr];
+               if len(keys) == 0:
+                   continue;
+               elif len(keys) == 1:
+                   val = regConditon[attr].pop(0)
+                   oneCond = f"{attr} REGEXP {val}"
+                   newFilterList.append(oneCond)
+               elif ( token == " AND " and attr.endswith(" NOT")) or (token == " OR " and not attr.endswith(" NOT") ) :
+                   val = "|".join(key.strip('"') for key in keys)
+                   oneCond = f"{attr} REGEXP \"{val}\""
+
+                   attr,op,val = formatAttrOpVal(oneCond)
+                   oneCond = f"{attr} REGEXP {val}"
+                   newFilterList.append(oneCond)
+               else:
+                   for val in keys:
+                       oneCond = f"{attr} REGEXP {val}"
+                       newFilterList.append(oneCond)
+
+        #print(f"newFilterList:{newFilterList}")
+        return (token, newFilterList)
 
 
 def diffRules(newRule, oldRule):
@@ -417,8 +531,69 @@ def diffRules(newRule, oldRule):
     if errNode is not None:
         return True
     ruleConstr1 = oldRule.find("./PatternClause/SubPattern/SingleEvtConstr").text
+    #print("=============")
+    #print(f"FFFF{ruleConstr1}")
     oldDict = generateDictFromExpression(ruleConstr1)
+    #print(f"DDDD{oldDict}")
 
+    #print("*****************")
     ruleConstr2 = newRule.find("./PatternClause/SubPattern/SingleEvtConstr").text
+    #print(f"FFFF{ruleConstr2}")
     newDict = generateDictFromExpression(ruleConstr2)
+    #print(f"DDDD{newDict}")
     return not compareDict(oldDict, newDict)
+
+
+def ruleDictToConstr(ruleDict):
+    currFormatedStr = None
+    currToken = ruleDict[0]
+    currFilterList = ruleDict[1];
+
+    for item in currFilterList:
+         substr = None;
+         if isinstance(item, str):
+             substr = item
+             if currFormatedStr is not None:
+                currFormatedStr += currToken +  substr;
+             else:
+                currFormatedStr = substr
+         else:
+             substr = ruleDictToConstr(item)
+             substr = "( " +  substr + " )"
+             if currFormatedStr is not None:
+                currFormatedStr += currToken + substr;
+             else:
+                 currFormatedStr = substr
+         continue;
+    return currFormatedStr;
+
+def prettyConstr(ruleDict, indent=""):
+    #ruleDict = {token, currFilterList}
+    currFormatedStr = None
+    currToken = ruleDict[0]
+    currFilterList = ruleDict[1];
+
+    for item in currFilterList:
+         substr = None;
+         if isinstance(item, str):
+             substr = item
+             if currFormatedStr is not None:
+                currFormatedStr += currToken + "\n" + indent + substr;
+             else:
+                currFormatedStr = indent + substr
+         else:
+             substr = prettyConstr(item, indent + "    ")
+             substr = "(\n" +  substr + "\n"+ indent +")"
+             if currFormatedStr is not None:
+                currFormatedStr += currToken + substr;
+             else:
+                 currFormatedStr = indent + substr
+         continue;
+    return currFormatedStr;
+
+#CONSTR="(rawEventMsg CONTAIN \"dpapi::masterkey\" OR rawEventMsg CONTAIN \"eo.oe.kiwi\" OR rawEventMsg CONTAIN \"event::clear\" OR rawEventMsg CONTAIN \"event::drop\" OR rawEventMsg CONTAIN \"gentilkiwi.com\" OR rawEventMsg CONTAIN \"kerberos::golden\" OR rawEventMsg CONTAIN \"kerberos::ptc\" OR rawEventMsg CONTAIN \"kerberos::ptt\" OR rawEventMsg CONTAIN \"kerberos::tgt\" OR rawEventMsg CONTAIN \"Kiwi Legit Printer\" OR rawEventMsg CONTAIN \"lsadump::\" OR rawEventMsg CONTAIN \"mimidrv.sys\" OR rawEventMsg CONTAIN \"\mimilib.dll\" OR rawEventMsg CONTAIN \"misc::printnightmare\" OR rawEventMsg CONTAIN \"misc::shadowcopies\" OR rawEventMsg CONTAIN \"misc::skeleton\" OR rawEventMsg CONTAIN \"privilege::backup\" OR rawEventMsg CONTAIN \"privilege::debug\" OR rawEventMsg CONTAIN \"privilege::driver\" OR rawEventMsg CONTAIN \"sekurlsa::\") AND eventType!=\"15\""
+#CONSTR="(eventType = \"Win-Security-5136\" AND propName IN (\"gPCMachineExtensionNames\", \"gPCUserExtensionNames\") AND propValue REGEXP \"AADCED64-746C-4633-A97C-D61349046527|CAB54552-DEEA-4691-817E-ED4A4D1AFC72\") OR (eventType = \"Win-Security-5145\" AND fileAccess REGEXP \"%%4417|WriteData\" AND fileName REGEXP \"\\SYSVOL$\" AND targetName REGEXP \"ScheduledTasks\.xml$\")"
+#CONSTR="( A=B AND (C=C OR D=D OR G=G) AND (C=C OR D=D OR G=G) ) OR ( A=B AND (C=C OR D=D OR G=G) AND (C=C OR D=D OR G=G) )"
+#newDict = generateDictFromExpression(CONSTR)
+#formatStr = prettyConstr("", newDict)
+#print(formatStr)

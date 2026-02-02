@@ -33,6 +33,15 @@ optional arguments:
 
 
 - Goto pySigma-backend-fortisiem/
+Prepare:
+1. Install pySigma
+   pip3 install pysigma
+2. Install pySigma-backend-fortisiem
+  - git clone code from https://github.com/FortiSIEM/pySigma-backend-fortisiem/tree/master
+   git clone git@github.com:FortiSIEM/pySigma-backend-fortisiem.git
+   cd pySigma-backend-fortisiem
+   python3 -m build
+   pip3 install dist/pysigma_backend_fortisiem-0.2.0-py3-none-any.whl 
 
 ###### Generate New rules file.
 - ./tools/fortisiem_sigma_tool.py -o NewRules.xml -f YML_file_full_path
