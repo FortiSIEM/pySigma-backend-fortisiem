@@ -221,12 +221,6 @@ class FortisiemXMLRuleFormater:
 
     def formatSingleEvtConstr(self, singleEvtConstr):
         ruleName = self.getElemText("Name")
-        if "Local User Creation" in ruleName:
-           if " OR " in singleEvtConstr:
-               singleEvtConstr = "( %s ) AND isLocalUser = \"yes\"" % (singleEvtConstr)
-           else:
-               singleEvtConstr = "%s AND isLocalUser = \"yes\"" % (singleEvtConstr)
-               
         return singleEvtConstr
 
     def generateRulePatternClause(self, condition, groupByAttrs):
